@@ -7,6 +7,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -29,6 +30,14 @@ public class ProjectEntity implements Serializable {
     @Column(name = "NAME", nullable = false)
     private String name;
 
+    @Column(name = "PROJECT_EXTERNAL_ID", nullable = false, unique = true)
+    private UUID projectExternalId;
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "project")
     private List<RoleEntity> roles = new ArrayList<>();
+
+    @PrePersist
+    public void generateProjectExternalId() {
+        this.projectExternalId = UUID.randomUUID();
+    }
 }
