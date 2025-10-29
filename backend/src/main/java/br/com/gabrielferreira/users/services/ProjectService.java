@@ -15,5 +15,5 @@ public interface ProjectService {
 
     List<ProjectEntity> getAllProjects();
 
-    void  delete(UUID projectExternalId);
+    void delete(UUID projectExternalId);
 }

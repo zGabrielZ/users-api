@@ -27,7 +27,7 @@ public class ProjectEntity implements Serializable {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "NAME", nullable = false, unique = true)
     private String name;
 
     @Column(name = "PROJECT_EXTERNAL_ID", nullable = false, unique = true)

@@ -1,6 +1,7 @@
 package br.com.gabrielferreira.users.services.impl;
 
 import br.com.gabrielferreira.users.entities.ProjectEntity;
+import br.com.gabrielferreira.users.exceptions.BusinessRuleException;
 import br.com.gabrielferreira.users.exceptions.EntityInUseException;
 import br.com.gabrielferreira.users.exceptions.ProjectNotFoundException;
 import br.com.gabrielferreira.users.repositories.ProjectRepository;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -22,6 +24,9 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     @Override
     public ProjectEntity save(ProjectEntity projectEntity) {
+        if (projectRepository.existsByName(projectEntity.getName())) {
+            throw new BusinessRuleException("A project with the name '%s' already exists.".formatted(projectEntity.getName()));
+        }
         return projectRepository.save(projectEntity);
     }
 
@@ -35,6 +40,11 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectEntity update(UUID projectExternalId, ProjectEntity projectEntity) {
         var projectFound = getOneProject(projectExternalId);
+        var projectWithName = projectRepository.findOneByName(projectEntity.getName());
+        if (projectWithName.isPresent() && !Objects.equals(projectFound.getId(), projectWithName.get().getId())) {
+            throw new BusinessRuleException("A project with the name '%s' already exists.".formatted(projectEntity.getName()));
+        }
+
         projectFound.setName(projectEntity.getName());
         return projectRepository.save(projectFound);
     }
