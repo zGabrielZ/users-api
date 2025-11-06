@@ -3,12 +3,22 @@ package br.com.gabrielferreira.users.mappers.project.input;
 import br.com.gabrielferreira.users.dtos.input.CreateProjectInputDTO;
 import br.com.gabrielferreira.users.dtos.input.UpdateProjectInputDTO;
 import br.com.gabrielferreira.users.entities.ProjectEntity;
+import br.com.gabrielferreira.users.utils.Constants;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 @Mapper(componentModel = "spring")
 public interface ProjectInputMapper {
 
+    @Mapping(source = "name", target = "name", qualifiedByName = "trimIfNotBlank")
     ProjectEntity toProjectEntity(CreateProjectInputDTO createProjectInputDTO);
 
+    @Mapping(source = "name", target = "name", qualifiedByName = "trimIfNotBlank")
     ProjectEntity toProjectEntity(UpdateProjectInputDTO updateProjectInputDTO);
+
+    @Named("trimIfNotBlank")
+    default String trimIfNotBlank(String value) {
+        return Constants.trimIfNotBlank(value);
+    }
 }

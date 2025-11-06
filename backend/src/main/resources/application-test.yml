@@ -19,3 +19,5 @@ spring:
 logging:
   level:
     br.com.gabrielferreira.users: TRACE
+
+users.api.base-uri: http://localhost:9090/api/users/

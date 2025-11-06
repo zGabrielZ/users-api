@@ -1,4 +1,4 @@
-package br.com.gabrielferreira.users.controllers;
+package br.com.gabrielferreira.users.api.controllers;
 
 import br.com.gabrielferreira.users.dtos.input.CreateProjectInputDTO;
 import br.com.gabrielferreira.users.dtos.input.UpdateProjectInputDTO;
