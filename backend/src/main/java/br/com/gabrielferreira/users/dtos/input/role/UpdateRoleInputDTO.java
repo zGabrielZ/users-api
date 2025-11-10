@@ -1,4 +1,4 @@
-package br.com.gabrielferreira.users.dtos.input;
+package br.com.gabrielferreira.users.dtos.input.role;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -10,16 +10,27 @@ import java.io.Serializable;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
-public record UpdateProjectInputDTO(
+public record UpdateRoleInputDTO(
         @Schema(
-                description = "Name of the project",
-                example = "PROJECT_BOOKSTORE"
+                description = "Role name",
+                example = "Administrator"
         )
         @NotBlank
         @Length(
                 min = 1,
                 max = 255
         )
-        String name
+        String description,
+
+        @Schema(
+                description = "Role authority",
+                example = "ROLE_ADMINISTRATOR"
+        )
+        @NotBlank
+        @Length(
+                min = 1,
+                max = 255
+        )
+        String authority
 ) implements Serializable {
 }

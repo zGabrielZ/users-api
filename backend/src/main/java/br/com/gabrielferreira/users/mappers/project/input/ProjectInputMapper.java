@@ -1,7 +1,7 @@
 package br.com.gabrielferreira.users.mappers.project.input;
 
-import br.com.gabrielferreira.users.dtos.input.CreateProjectInputDTO;
-import br.com.gabrielferreira.users.dtos.input.UpdateProjectInputDTO;
+import br.com.gabrielferreira.users.dtos.input.project.CreateProjectInputDTO;
+import br.com.gabrielferreira.users.dtos.input.project.UpdateProjectInputDTO;
 import br.com.gabrielferreira.users.entities.ProjectEntity;
 import br.com.gabrielferreira.users.utils.Constants;
 import org.mapstruct.Mapper;

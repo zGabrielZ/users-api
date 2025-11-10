@@ -1,8 +1,8 @@
 package br.com.gabrielferreira.users.api.controllers;
 
-import br.com.gabrielferreira.users.dtos.input.CreateProjectInputDTO;
-import br.com.gabrielferreira.users.dtos.input.UpdateProjectInputDTO;
-import br.com.gabrielferreira.users.dtos.output.ProjectOutputDTO;
+import br.com.gabrielferreira.users.dtos.input.project.CreateProjectInputDTO;
+import br.com.gabrielferreira.users.dtos.input.project.UpdateProjectInputDTO;
+import br.com.gabrielferreira.users.dtos.output.project.ProjectOutputDTO;
 import br.com.gabrielferreira.users.mappers.project.input.ProjectInputMapper;
 import br.com.gabrielferreira.users.mappers.project.output.ProjectOutputMapper;
 import br.com.gabrielferreira.users.services.ProjectService;

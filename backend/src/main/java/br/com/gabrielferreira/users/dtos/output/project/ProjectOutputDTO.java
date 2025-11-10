@@ -1,4 +1,4 @@
-package br.com.gabrielferreira.users.dtos.output;
+package br.com.gabrielferreira.users.dtos.output.project;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;

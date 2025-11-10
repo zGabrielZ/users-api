@@ -24,6 +24,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -242,6 +244,28 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
                 toFields(ex.getBindingResult().getAllErrors())
         );
         return handleExceptionInternal(ex, problemDetailDto, new HttpHeaders(), httpStatus, request);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleServletRequestBindingException(ServletRequestBindingException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        if (ex instanceof MissingRequestHeaderException missingRequestHeaderException) {
+            HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+            ProblemDetailType problemDetailType = ProblemDetailType.INVALID_HEADER;
+            String detail = String.format("The request header '%s' is missing. Please provide the required header and try again.",
+                    missingRequestHeaderException.getHeaderName()
+            );
+            ProblemDetailDTO problemDetailDto = problemDetailMapper.toProblemDetailDto(
+                    httpStatus.value(),
+                    apiBaseUri.concat(problemDetailType.getUri()),
+                    problemDetailType.getTitle(),
+                    detail ,
+                    problemDetailType.getMessage(),
+                    Constants.now(),
+                    null
+            );
+            return handleExceptionInternal(ex, problemDetailDto, headers, status, request);
+        }
+        return super.handleServletRequestBindingException(ex, headers, status, request);
     }
 
     @Override

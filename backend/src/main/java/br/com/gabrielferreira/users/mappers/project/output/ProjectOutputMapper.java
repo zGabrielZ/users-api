@@ -1,6 +1,6 @@
 package br.com.gabrielferreira.users.mappers.project.output;
 
-import br.com.gabrielferreira.users.dtos.output.ProjectOutputDTO;
+import br.com.gabrielferreira.users.dtos.output.project.ProjectOutputDTO;
 import br.com.gabrielferreira.users.entities.ProjectEntity;
 import org.mapstruct.Mapper;
 import org.springframework.util.CollectionUtils;
