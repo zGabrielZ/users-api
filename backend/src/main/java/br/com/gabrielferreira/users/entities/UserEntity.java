@@ -16,7 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ToString(exclude = "project")
+@ToString(exclude = {"project", "document"})
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "TB_USER", uniqueConstraints = {
@@ -56,6 +56,9 @@ public class UserEntity implements Serializable {
     @JoinColumn(name = "PROJECT_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_USER_PROJECT_ID"))
     @ManyToOne(fetch = FetchType.LAZY)
     private ProjectEntity project;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private DocumentEntity documentEntity;
 
     @CreationTimestamp
     @Column(name = "CREATED_AT", nullable = false, updatable = false, columnDefinition = "datetime")
