@@ -20,7 +20,8 @@ import java.util.UUID;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "TB_USER", uniqueConstraints = {
-        @UniqueConstraint(name = "UK_EMAIL_PROJECT", columnNames = {"EMAIL", "PROJECT_ID"})
+        @UniqueConstraint(name = "UK_EMAIL_PROJECT", columnNames = {"EMAIL", "PROJECT_ID"}),
+        @UniqueConstraint(name = "UK_DOCUMENT_PROJECT", columnNames = {"DOCUMENT_ID", "PROJECT_ID"})
 })
 public class UserEntity implements Serializable {
 
@@ -57,8 +58,9 @@ public class UserEntity implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     private ProjectEntity project;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private DocumentEntity documentEntity;
+    @JoinColumn(name = "DOCUMENT_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_USER_DOCUMENT_ID"))
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private DocumentEntity document;
 
     @CreationTimestamp
     @Column(name = "CREATED_AT", nullable = false, updatable = false, columnDefinition = "datetime")

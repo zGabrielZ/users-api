@@ -15,9 +15,7 @@ import java.util.UUID;
 @ToString(exclude = {"user"})
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "TB_DOCUMENT", uniqueConstraints = {
-        @UniqueConstraint(name = "UK_TYPE_NUMBER_USER", columnNames = {"TYPE", "NUMBER", "USER_ID"})
-})
+@Table(name = "TB_DOCUMENT")
 public class DocumentEntity implements Serializable {
 
     @Serial
@@ -35,8 +33,7 @@ public class DocumentEntity implements Serializable {
     @Column(name = "NUMBER")
     private String number;
 
-    @JoinColumn(name = "USER_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_DOCUMENT_USER_ID"))
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "document")
     private UserEntity user;
 
     @Column(name = "DOCUMENT_EXTERNAL_ID", nullable = false, unique = true)
