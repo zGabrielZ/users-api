@@ -1,11 +1,10 @@
 package br.com.gabrielferreira.users.api.controllers;
 
-import br.com.gabrielferreira.users.dtos.input.user.CreateUserInputDTO;
-import br.com.gabrielferreira.users.dtos.output.role.RoleOutputDTO;
-import br.com.gabrielferreira.users.dtos.output.user.UserOutputDTO;
-import br.com.gabrielferreira.users.mappers.user.input.UserInputMapper;
-import br.com.gabrielferreira.users.mappers.user.output.UserOutputMapper;
-import br.com.gabrielferreira.users.services.UserService;
+import br.com.gabrielferreira.users.api.dtos.input.user.CreateUserInputDTO;
+import br.com.gabrielferreira.users.api.dtos.output.user.UserOutputDTO;
+import br.com.gabrielferreira.users.api.mappers.user.input.UserInputMapper;
+import br.com.gabrielferreira.users.api.mappers.user.output.UserOutputMapper;
+import br.com.gabrielferreira.users.domain.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

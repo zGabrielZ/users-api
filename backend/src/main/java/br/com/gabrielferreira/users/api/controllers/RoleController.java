@@ -1,11 +1,11 @@
 package br.com.gabrielferreira.users.api.controllers;
 
-import br.com.gabrielferreira.users.dtos.input.role.CreateRoleInputDTO;
-import br.com.gabrielferreira.users.dtos.input.role.UpdateRoleInputDTO;
-import br.com.gabrielferreira.users.dtos.output.role.RoleOutputDTO;
-import br.com.gabrielferreira.users.mappers.role.input.RoleInputMapper;
-import br.com.gabrielferreira.users.mappers.role.output.RoleOutputMapper;
-import br.com.gabrielferreira.users.services.RoleService;
+import br.com.gabrielferreira.users.api.dtos.input.role.CreateRoleInputDTO;
+import br.com.gabrielferreira.users.api.dtos.input.role.UpdateRoleInputDTO;
+import br.com.gabrielferreira.users.api.dtos.output.role.RoleOutputDTO;
+import br.com.gabrielferreira.users.api.mappers.role.input.RoleInputMapper;
+import br.com.gabrielferreira.users.api.mappers.role.output.RoleOutputMapper;
+import br.com.gabrielferreira.users.domain.services.RoleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
