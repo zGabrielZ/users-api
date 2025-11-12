@@ -1,0 +1,23 @@
+services:
+  users-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app
+    container_name: users-api
+    environment:
+      APP_PROFILE: test
+      JDBC_DATABASE_URL: jdbc:h2:mem:testdb
+      JDBC_DATABASE_USERNAME: sa
+      JDBC_DATABASE_PASSWORD:
+      HIBERNATE_SHOW_SQL: "true"
+      HIBERNATE_FORMAT_SQL: "true"
+    ports:
+      - "9191:9090"
+    networks:
+      - compose-bridge
+    restart: always
+
+networks:
+  compose-bridge:
+    driver: bridge
