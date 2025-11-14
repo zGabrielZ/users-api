@@ -24,7 +24,8 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     @Override
     public ProjectEntity save(ProjectEntity projectEntity) {
-        if (projectRepository.existsByName(projectEntity.getName())) {
+        var existingProjectWithName = projectRepository.findOneByName(projectEntity.getName());
+        if (existingProjectWithName.isPresent()) {
             throw new BusinessRuleException("A project with the name '%s' already exists.".formatted(projectEntity.getName()));
         }
         return projectRepository.save(projectEntity);
@@ -40,8 +41,8 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectEntity update(UUID projectExternalId, ProjectEntity projectEntity) {
         var projectFound = getOneProject(projectExternalId);
-        var projectWithName = projectRepository.findOneByName(projectEntity.getName());
-        if (projectWithName.isPresent() && !Objects.equals(projectFound.getId(), projectWithName.get().getId())) {
+        var existingProjectWithName = projectRepository.findOneByName(projectEntity.getName());
+        if (existingProjectWithName.isPresent() && !Objects.equals(projectFound.getProjectExternalId(), existingProjectWithName.get().getProjectExternalId())) {
             throw new BusinessRuleException("A project with the name '%s' already exists.".formatted(projectEntity.getName()));
         }
 

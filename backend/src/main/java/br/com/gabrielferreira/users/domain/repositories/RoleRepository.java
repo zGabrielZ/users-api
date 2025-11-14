@@ -1,6 +1,7 @@
 package br.com.gabrielferreira.users.domain.repositories;
 
 import br.com.gabrielferreira.users.domain.entities.RoleEntity;
+import br.com.gabrielferreira.users.domain.repositories.projection.SummaryRoleProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,7 +22,13 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
     )
     Optional<RoleEntity> findOneByRoleExternalIdAndProject_ProjectExternalId(@Param("roleExternalId") UUID roleExternalId, @Param("projectExternalId") UUID projectExternalId);
 
-    Optional<RoleEntity> findOneByAuthorityAndProject_ProjectExternalId(String authority, UUID projectExternalId);
+    @Query(
+            "SELECT r.roleExternalId as roleExternalId, r.authority as authority FROM RoleEntity r " +
+                    "JOIN r.project p " +
+                    "WHERE r.authority = :authority " +
+                    "AND p.projectExternalId = :projectExternalId"
+    )
+    Optional<SummaryRoleProjection> findOneByAuthorityAndProject_ProjectExternalId(@Param("authority") String authority, @Param("projectExternalId") UUID projectExternalId);
 
     @Query(
             "SELECT r FROM RoleEntity r " +

@@ -29,8 +29,8 @@ public class RoleServiceImpl implements RoleService {
         var project = projectService.getOneProject(projectExternalId);
         roleEntity.setProject(project);
 
-        var roleWithAuthority = roleRepository.findOneByAuthorityAndProject_ProjectExternalId(roleEntity.getAuthority(), projectExternalId);
-        if (roleWithAuthority.isPresent()) {
+        var existingRoleWithAuthority = roleRepository.findOneByAuthorityAndProject_ProjectExternalId(roleEntity.getAuthority(), projectExternalId);
+        if (existingRoleWithAuthority.isPresent()) {
             String message = String.format("A role with the authority '%s' already exists in the project '%s'.",
                     roleEntity.getAuthority(), project.getName());
             throw new BusinessRuleException(message);
@@ -51,8 +51,8 @@ public class RoleServiceImpl implements RoleService {
         var project = projectService.getOneProject(projectExternalId);
         var role = getOneRole(roleExternalId, projectExternalId);
 
-        var roleWithAuthority = roleRepository.findOneByAuthorityAndProject_ProjectExternalId(roleEntity.getAuthority(), projectExternalId);
-        if (roleWithAuthority.isPresent() && !Objects.equals(roleWithAuthority.get().getId(), role.getId())) {
+        var existingRoleWithAuthority = roleRepository.findOneByAuthorityAndProject_ProjectExternalId(roleEntity.getAuthority(), projectExternalId);
+        if (existingRoleWithAuthority.isPresent() && !Objects.equals(existingRoleWithAuthority.get().getRoleExternalId(), role.getRoleExternalId())) {
             String message = String.format("A role with the authority '%s' already exists in the project '%s'.",
                     roleEntity.getAuthority(), project.getName());
             throw new BusinessRuleException(message);

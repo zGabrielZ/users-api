@@ -1,7 +1,10 @@
 package br.com.gabrielferreira.users.domain.repositories;
 
 import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
+import br.com.gabrielferreira.users.domain.repositories.projection.SummaryProjectProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -12,7 +15,8 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
 
     Optional<ProjectEntity> findOneByProjectExternalId(UUID projectExternalId);
 
-    boolean existsByName(String name);
-
-    Optional<ProjectEntity> findOneByName(String name);
+    @Query(
+            "SELECT p.projectExternalId as projectExternalId, p.name as name FROM ProjectEntity p WHERE p.name = :name"
+    )
+    Optional<SummaryProjectProjection> findOneByName(@Param("name") String name);
 }
