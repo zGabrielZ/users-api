@@ -9,6 +9,7 @@ import br.com.gabrielferreira.users.domain.repositories.UserRepository;
 import br.com.gabrielferreira.users.domain.services.ProjectService;
 import br.com.gabrielferreira.users.domain.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,9 +70,43 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UserNotFoundException(userExternalId, projectExternalId));
     }
 
+    @Transactional
     @Override
-    public UserEntity update(UUID userExternalId, UserEntity roleEntity, UUID projectExternalId) {
-        return null;
+    public UserEntity update(UUID userExternalId, UserEntity userEntity, UUID projectExternalId) {
+        var userFound = getOneUser(userExternalId, projectExternalId);
+
+        userFound.setFirstName(userEntity.getFirstName());
+        userFound.setLastName(userEntity.getLastName());
+        return userRepository.save(userFound);
+    }
+
+    @Transactional
+    @Override
+    public UserEntity updateEmail(UUID userExternalId, String newEmail, UUID projectExternalId) {
+        var userFound = getOneUser(userExternalId, projectExternalId);
+        var existingUserWithEmailAndProject = userRepository.findOneByEmailAndProject_ProjectExternalId(
+                newEmail,
+                projectExternalId
+        );
+
+        if (existingUserWithEmailAndProject.isPresent() && !Objects.equals(userFound.getUserExternalId(), existingUserWithEmailAndProject.get().getUserExternalId())) {
+            throw new BusinessRuleException("Already exists a user with this email in the project");
+        }
+
+        userFound.setEmail(newEmail);
+        return userRepository.save(userFound);
+    }
+
+    @Transactional
+    @Override
+    public UserEntity updatePassword(UUID userExternalId, String oldPassword, String newPassword, UUID projectExternalId) {
+        var userFound = getOneUser(userExternalId, projectExternalId);
+        if (!StringUtils.equals(oldPassword, userFound.getPassword())) {
+            throw new BusinessRuleException("Old password does not match");
+        }
+
+        userFound.setPassword(newPassword);
+        return userRepository.save(userFound);
     }
 
     @Override

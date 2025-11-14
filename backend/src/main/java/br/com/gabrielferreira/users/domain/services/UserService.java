@@ -11,7 +11,12 @@ public interface UserService {
 
     UserEntity getOneUser(UUID userExternalId, UUID projectExternalId);
 
-    UserEntity update(UUID userExternalId, UserEntity roleEntity, UUID projectExternalId);
+    UserEntity update(UUID userExternalId, UserEntity userEntity, UUID projectExternalId);
+
+    UserEntity updateEmail(UUID userExternalId, String newEmail, UUID projectExternalId);
+
+    UserEntity updatePassword(UUID userExternalId, String oldPassword,
+                                                   String newPassword, UUID projectExternalId);
 
     List<UserEntity> getAllUsers(UUID projectExternalId);
 
