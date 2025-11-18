@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -20,6 +21,12 @@ public record ProjectOutputDTO(
                 description = "Project name",
                 example = "PROJECT_EVENT"
         )
-        String name
+        String name,
+
+        @Schema(
+                description = "Project creation date and time",
+                example = "2024-06-01T12:00:00Z"
+        )
+        OffsetDateTime createdAt
 ) implements Serializable {
 }

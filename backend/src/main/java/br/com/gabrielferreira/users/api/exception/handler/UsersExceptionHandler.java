@@ -7,7 +7,6 @@ import br.com.gabrielferreira.users.api.exception.mappers.ProblemDetailMapper;
 import br.com.gabrielferreira.users.domain.exceptions.BusinessRuleException;
 import br.com.gabrielferreira.users.domain.exceptions.EntityInUseException;
 import br.com.gabrielferreira.users.domain.exceptions.EntityNotFoundException;
-import br.com.gabrielferreira.users.core.utils.Constants;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -34,6 +33,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -43,6 +43,7 @@ import java.util.Objects;
 public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final String GENERIC_USER_MESSAGE = "An unexpected internal system error has occurred. Please try again and if the problem persists, contact the system administrator.";
+    private static final OffsetDateTime NOW = OffsetDateTime.now();
 
     private final MessageSource messageSource;
 
@@ -84,7 +85,7 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
                 problemDetailType.getTitle(),
                 GENERIC_USER_MESSAGE,
                 problemDetailType.getMessage(),
-                Constants.now(),
+                NOW,
                 null
         );
         return handleExceptionInternal(ex, problemDetailDto, new HttpHeaders(), httpStatus, request);
@@ -146,7 +147,7 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
                 problemDetailType.getTitle(),
                 ex.getMessage(),
                 problemDetailType.getMessage(),
-                Constants.now(),
+                NOW,
                 null
         );
         return handleExceptionInternal(ex, problemDetailDto, new HttpHeaders(), httpStatus, request);
@@ -185,7 +186,7 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
                 problemDetailType.getTitle(),
                 ex.getMessage(),
                 problemDetailType.getMessage(),
-                Constants.now(),
+                NOW,
                 null
         );
         return handleExceptionInternal(ex, problemDetailDto, new HttpHeaders(), httpStatus, request);
@@ -224,7 +225,7 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
                 problemDetailType.getTitle(),
                 ex.getMessage(),
                 problemDetailType.getMessage(),
-                Constants.now(),
+                NOW,
                 null
         );
         return handleExceptionInternal(ex, problemDetailDto, new HttpHeaders(), httpStatus, request);
@@ -240,7 +241,7 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
                 problemDetailType.getTitle(),
                 problemDetailType.getMessage(),
                 problemDetailType.getMessage(),
-                Constants.now(),
+                NOW,
                 toFields(ex.getBindingResult().getAllErrors())
         );
         return handleExceptionInternal(ex, problemDetailDto, new HttpHeaders(), httpStatus, request);
@@ -260,7 +261,7 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
                     problemDetailType.getTitle(),
                     detail ,
                     problemDetailType.getMessage(),
-                    Constants.now(),
+                    NOW,
                     null
             );
             return handleExceptionInternal(ex, problemDetailDto, headers, status, request);
@@ -284,7 +285,7 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
                     problemDetailType.getTitle(),
                     detail ,
                     problemDetailType.getMessage(),
-                    Constants.now(),
+                    NOW,
                     null
             );
             return handleExceptionInternal(ex, problemDetailDto, headers, status, request);
@@ -303,7 +304,7 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
                 problemDetailType.getTitle(),
                 detail,
                 problemDetailType.getMessage(),
-                Constants.now(),
+                NOW,
                 null
         );
         return handleExceptionInternal(ex, problemDetailDto, new HttpHeaders(), httpStatus, request);
@@ -320,7 +321,7 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
                     httpStatus.getReasonPhrase(),
                     GENERIC_USER_MESSAGE,
                     GENERIC_USER_MESSAGE,
-                    Constants.now(),
+                    NOW,
                     null
             );
         } else if (body instanceof String s) {
@@ -330,7 +331,7 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
                     s,
                     GENERIC_USER_MESSAGE,
                     GENERIC_USER_MESSAGE,
-                    Constants.now(),
+                    NOW,
                     null
             );
         }
