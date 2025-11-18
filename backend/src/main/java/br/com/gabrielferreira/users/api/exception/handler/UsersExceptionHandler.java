@@ -38,6 +38,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+// TODO: implementar validação de propriedade inexistente, implementar validação de json mal formado, implementar validação de tipo incompatível no json por exemplo é esperado integer mas foi passado string
 @ControllerAdvice
 @RequiredArgsConstructor
 public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
