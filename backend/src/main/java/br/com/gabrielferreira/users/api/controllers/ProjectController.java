@@ -1,7 +1,9 @@
 package br.com.gabrielferreira.users.api.controllers;
 
+import br.com.gabrielferreira.users.api.dtos.filter.ProjectFilterDTO;
 import br.com.gabrielferreira.users.api.dtos.input.project.CreateProjectInputDTO;
 import br.com.gabrielferreira.users.api.dtos.input.project.UpdateProjectInputDTO;
+import br.com.gabrielferreira.users.api.dtos.output.page.PageResponse;
 import br.com.gabrielferreira.users.api.dtos.output.project.ProjectOutputDTO;
 import br.com.gabrielferreira.users.api.mappers.project.input.ProjectInputMapper;
 import br.com.gabrielferreira.users.api.mappers.project.output.ProjectOutputMapper;
@@ -13,11 +15,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Projects", description = "Project management endpoints")
@@ -93,6 +98,7 @@ public class ProjectController {
         return ResponseEntity.ok(projectOutputDTO);
     }
 
+    // TODO: na propriedade sort, fazer um de -> para
     @Operation(summary = "List all projects")
     @ApiResponses(value = {
             @ApiResponse(
@@ -101,10 +107,14 @@ public class ProjectController {
             )
     })
     @GetMapping
-    public ResponseEntity<List<ProjectOutputDTO>> listAll() {
-        var projectEntities = projectService.getAllProjects();
+    public ResponseEntity<PageResponse<ProjectOutputDTO>> listAll(
+            @ParameterObject @PageableDefault(size = 5, sort = "name", direction = Sort.Direction.ASC)
+            Pageable pageable,
+            ProjectFilterDTO filter) {
+        var projectFilter = projectInputMapper.toProjectFilter(filter);
+        var projectEntities = projectService.getAllProjects(projectFilter, pageable);
 
-        var projectOutputDTOs = projectOutputMapper.toCollectionDto(projectEntities);
+        var projectOutputDTOs = projectOutputMapper.toPageDto(projectEntities);
         return ResponseEntity.ok(projectOutputDTOs);
     }
 

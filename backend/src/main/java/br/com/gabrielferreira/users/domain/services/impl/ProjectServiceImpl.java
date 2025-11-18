@@ -5,13 +5,16 @@ import br.com.gabrielferreira.users.domain.exceptions.BusinessRuleException;
 import br.com.gabrielferreira.users.domain.exceptions.EntityInUseException;
 import br.com.gabrielferreira.users.domain.exceptions.ProjectNotFoundException;
 import br.com.gabrielferreira.users.domain.repositories.ProjectRepository;
+import br.com.gabrielferreira.users.domain.repositories.filter.ProjectFilter;
 import br.com.gabrielferreira.users.domain.services.ProjectService;
+import br.com.gabrielferreira.users.domain.specs.ProjectSpec;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -51,8 +54,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectEntity> getAllProjects() {
-        return projectRepository.findAll();
+    public Page<ProjectEntity> getAllProjects(ProjectFilter filter, Pageable pageable) {
+        return projectRepository.findAll(ProjectSpec.usingFilter(filter), pageable);
     }
 
     @Transactional
