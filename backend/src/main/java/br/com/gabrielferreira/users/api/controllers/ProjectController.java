@@ -28,7 +28,7 @@ import java.util.UUID;
 
 @Tag(name = "Projects", description = "Project management endpoints")
 @RestController
-@RequestMapping("/projects")
+@RequestMapping("/v1/projects")
 @RequiredArgsConstructor
 public class ProjectController {
 
