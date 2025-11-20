@@ -7,6 +7,7 @@ import br.com.gabrielferreira.users.api.dtos.output.page.PageResponse;
 import br.com.gabrielferreira.users.api.dtos.output.project.ProjectOutputDTO;
 import br.com.gabrielferreira.users.api.mappers.project.input.ProjectInputMapper;
 import br.com.gabrielferreira.users.api.mappers.project.output.ProjectOutputMapper;
+import br.com.gabrielferreira.users.core.utils.PageTranslate;
 import br.com.gabrielferreira.users.domain.services.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -98,7 +99,6 @@ public class ProjectController {
         return ResponseEntity.ok(projectOutputDTO);
     }
 
-    // TODO: na propriedade sort, fazer um de -> para
     @Operation(summary = "List all projects")
     @ApiResponses(value = {
             @ApiResponse(
@@ -108,9 +108,10 @@ public class ProjectController {
     })
     @GetMapping
     public ResponseEntity<PageResponse<ProjectOutputDTO>> listAll(
-            @ParameterObject @PageableDefault(size = 5, sort = "name", direction = Sort.Direction.ASC)
+            @ParameterObject @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.ASC)
             Pageable pageable,
             ProjectFilterDTO filter) {
+        pageable = PageTranslate.toPageable(pageable, PageTranslate.getProjectPageableFieldsMapping());
         var projectFilter = projectInputMapper.toProjectFilter(filter);
         var projectEntities = projectService.getAllProjects(projectFilter, pageable);
 
