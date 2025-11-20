@@ -7,6 +7,9 @@ import br.com.gabrielferreira.users.api.exception.mappers.ProblemDetailMapper;
 import br.com.gabrielferreira.users.domain.exceptions.BusinessRuleException;
 import br.com.gabrielferreira.users.domain.exceptions.EntityInUseException;
 import br.com.gabrielferreira.users.domain.exceptions.EntityNotFoundException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.fasterxml.jackson.databind.exc.PropertyBindingException;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,6 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -37,8 +41,8 @@ import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
-// TODO: implementar validação de propriedade inexistente, implementar validação de json mal formado, implementar validação de tipo incompatível no json por exemplo é esperado integer mas foi passado string
 @ControllerAdvice
 @RequiredArgsConstructor
 public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
@@ -80,13 +84,10 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleUncaught(Exception ex, WebRequest request) {
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         ProblemDetailType problemDetailType = ProblemDetailType.SYSTEM_ERROR;
-        ProblemDetailDTO problemDetailDto = problemDetailMapper.toProblemDetailDto(
-                httpStatus.value(),
-                apiBaseUri.concat(problemDetailType.getUri()),
-                problemDetailType.getTitle(),
+        ProblemDetailDTO problemDetailDto = createProblemDetailDto(
+                httpStatus,
+                problemDetailType,
                 GENERIC_USER_MESSAGE,
-                problemDetailType.getMessage(),
-                NOW,
                 null
         );
         return handleExceptionInternal(ex, problemDetailDto, new HttpHeaders(), httpStatus, request);
@@ -142,13 +143,10 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleBusinessRuleException(BusinessRuleException ex, WebRequest request) {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         ProblemDetailType problemDetailType = ProblemDetailType.BUSINESS_RULE_VIOLATION;
-        ProblemDetailDTO problemDetailDto = problemDetailMapper.toProblemDetailDto(
-                httpStatus.value(),
-                apiBaseUri.concat(problemDetailType.getUri()),
-                problemDetailType.getTitle(),
+        ProblemDetailDTO problemDetailDto = createProblemDetailDto(
+                httpStatus,
+                problemDetailType,
                 ex.getMessage(),
-                problemDetailType.getMessage(),
-                NOW,
                 null
         );
         return handleExceptionInternal(ex, problemDetailDto, new HttpHeaders(), httpStatus, request);
@@ -181,13 +179,10 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleEntityInUseException(EntityInUseException ex, WebRequest request) {
         HttpStatus httpStatus = HttpStatus.CONFLICT;
         ProblemDetailType problemDetailType = ProblemDetailType.ENTITY_IN_USE;
-        ProblemDetailDTO problemDetailDto = problemDetailMapper.toProblemDetailDto(
-                httpStatus.value(),
-                apiBaseUri.concat(problemDetailType.getUri()),
-                problemDetailType.getTitle(),
+        ProblemDetailDTO problemDetailDto = createProblemDetailDto(
+                httpStatus,
+                problemDetailType,
                 ex.getMessage(),
-                problemDetailType.getMessage(),
-                NOW,
                 null
         );
         return handleExceptionInternal(ex, problemDetailDto, new HttpHeaders(), httpStatus, request);
@@ -220,13 +215,10 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleEntityNotFoundException(EntityNotFoundException ex, WebRequest request) {
         HttpStatus httpStatus = HttpStatus.NOT_FOUND;
         ProblemDetailType problemDetailType = ProblemDetailType.RESOURCE_NOT_FOUND;
-        ProblemDetailDTO problemDetailDto = problemDetailMapper.toProblemDetailDto(
-                httpStatus.value(),
-                apiBaseUri.concat(problemDetailType.getUri()),
-                problemDetailType.getTitle(),
+        ProblemDetailDTO problemDetailDto = createProblemDetailDto(
+                httpStatus,
+                problemDetailType,
                 ex.getMessage(),
-                problemDetailType.getMessage(),
-                NOW,
                 null
         );
         return handleExceptionInternal(ex, problemDetailDto, new HttpHeaders(), httpStatus, request);
@@ -236,13 +228,10 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         ProblemDetailType problemDetailType = ProblemDetailType.INVALID_DATA;
-        ProblemDetailDTO problemDetailDto = problemDetailMapper.toProblemDetailDto(
-                httpStatus.value(),
-                apiBaseUri.concat(problemDetailType.getUri()),
-                problemDetailType.getTitle(),
+        ProblemDetailDTO problemDetailDto = createProblemDetailDto(
+                httpStatus,
+                problemDetailType,
                 problemDetailType.getMessage(),
-                problemDetailType.getMessage(),
-                NOW,
                 toFields(ex.getBindingResult().getAllErrors())
         );
         return handleExceptionInternal(ex, problemDetailDto, new HttpHeaders(), httpStatus, request);
@@ -256,13 +245,10 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
             String detail = String.format("The request header '%s' is missing. Please provide the required header and try again.",
                     missingRequestHeaderException.getHeaderName()
             );
-            ProblemDetailDTO problemDetailDto = problemDetailMapper.toProblemDetailDto(
-                    httpStatus.value(),
-                    apiBaseUri.concat(problemDetailType.getUri()),
-                    problemDetailType.getTitle(),
-                    detail ,
-                    problemDetailType.getMessage(),
-                    NOW,
+            ProblemDetailDTO problemDetailDto = createProblemDetailDto(
+                    httpStatus,
+                    problemDetailType,
+                    detail,
                     null
             );
             return handleExceptionInternal(ex, problemDetailDto, headers, status, request);
@@ -280,13 +266,10 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
                     methodArgumentTypeMismatchException.getValue(),
                     methodArgumentTypeMismatchException.getParameter().getParameterType().getSimpleName()
             );
-            ProblemDetailDTO problemDetailDto = problemDetailMapper.toProblemDetailDto(
-                    httpStatus.value(),
-                    apiBaseUri.concat(problemDetailType.getUri()),
-                    problemDetailType.getTitle(),
-                    detail ,
-                    problemDetailType.getMessage(),
-                    NOW,
+            ProblemDetailDTO problemDetailDto = createProblemDetailDto(
+                    httpStatus,
+                    problemDetailType,
+                    detail,
                     null
             );
             return handleExceptionInternal(ex, problemDetailDto, headers, status, request);
@@ -299,16 +282,65 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
         HttpStatus httpStatus = HttpStatus.NOT_FOUND;
         ProblemDetailType problemDetailType = ProblemDetailType.RESOURCE_NOT_FOUND;
         String detail = String.format("The resource '%s' who you tried to access is not found.", ex.getResourcePath());
-        ProblemDetailDTO problemDetailDto = problemDetailMapper.toProblemDetailDto(
-                httpStatus.value(),
-                apiBaseUri.concat(problemDetailType.getUri()),
-                problemDetailType.getTitle(),
+        ProblemDetailDTO problemDetailDto = createProblemDetailDto(
+                httpStatus,
+                problemDetailType,
                 detail,
-                problemDetailType.getMessage(),
-                NOW,
                 null
         );
         return handleExceptionInternal(ex, problemDetailDto, new HttpHeaders(), httpStatus, request);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        if (Objects.nonNull(ex.getCause()) && ex.getCause() instanceof InvalidFormatException invalidFormatException) {
+            return handleInvalidFormatException(invalidFormatException, headers, status, request);
+        }
+
+        if (Objects.nonNull(ex.getCause()) && ex.getCause() instanceof PropertyBindingException propertyBindingException) {
+            return handlePropertyBindingException(propertyBindingException, headers, status, request);
+        }
+
+        HttpStatus httpStatus = HttpStatus.valueOf(status.value());
+        ProblemDetailType problemDetailType = ProblemDetailType.MALFORMED_REQUEST;
+        String detail = "Your request body is malformed. Please correct it and try again.";
+        ProblemDetailDTO problemDetailDto = createProblemDetailDto(
+                httpStatus,
+                problemDetailType,
+                detail,
+                null
+        );
+        return handleExceptionInternal(ex, problemDetailDto, new HttpHeaders(), httpStatus, request);
+    }
+
+    private ResponseEntity<Object> handlePropertyBindingException(PropertyBindingException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        HttpStatus httpStatus =  HttpStatus.valueOf(status.value());
+        ProblemDetailType problemDetailType = ProblemDetailType.MALFORMED_REQUEST;
+        String detail = String.format("The property '%s' does not exist. Correct or remove this property and try again.",  getPath(ex.getPath()));
+        ProblemDetailDTO problemDetailDto = createProblemDetailDto(
+                httpStatus,
+                problemDetailType,
+                detail,
+                null
+        );
+        return handleExceptionInternal(ex, problemDetailDto, headers, httpStatus, request);
+    }
+
+    private ResponseEntity<Object> handleInvalidFormatException(InvalidFormatException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        HttpStatus httpStatus = HttpStatus.valueOf(status.value());
+        ProblemDetailType problemDetailType = ProblemDetailType.MALFORMED_REQUEST;
+        String detail = String.format("The property '%s' received the value '%s', which is of an invalid type. Correct and provide a value compatible with the type %s.",
+                getPath(ex.getPath()),
+                ex.getValue(),
+                ex.getTargetType().getSimpleName()
+        );
+        ProblemDetailDTO problemDetailDto = createProblemDetailDto(
+                httpStatus,
+                problemDetailType,
+                detail,
+                null
+        );
+        return handleExceptionInternal(ex, problemDetailDto, headers, httpStatus, request);
     }
 
     @Override
@@ -338,6 +370,25 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
         }
 
         return super.handleExceptionInternal(ex, body, headers, statusCode, request);
+    }
+
+    private ProblemDetailDTO createProblemDetailDto(HttpStatus httpStatus, ProblemDetailType problemDetailType,
+                                                                                        String detail,  List<ProblemDetailFieldDTO> fields) {
+        return problemDetailMapper.toProblemDetailDto(
+                httpStatus.value(),
+                apiBaseUri.concat(problemDetailType.getUri()),
+                problemDetailType.getTitle(),
+                detail,
+                problemDetailType.getMessage(),
+                NOW,
+                fields
+        );
+    }
+
+    private String getPath(List<JsonMappingException.Reference> pathList) {
+        return pathList.stream()
+                .map(JsonMappingException.Reference::getFieldName)
+                .collect(Collectors.joining("."));
     }
 
     private List<ProblemDetailFieldDTO> toFields(List<ObjectError> objectErrors) {
