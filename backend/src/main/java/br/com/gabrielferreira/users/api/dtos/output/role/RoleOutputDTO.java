@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -28,6 +29,12 @@ public record RoleOutputDTO(
                 example = "ROLE_ADMINISTRATOR"
         )
         String authority,
+
+        @Schema(
+                description = "Role creation date and time",
+                example = "2024-06-01T12:00:00Z"
+        )
+        OffsetDateTime createdAt,
 
         @Schema(
                 description = "Project associated with the role"

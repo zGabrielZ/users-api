@@ -2,9 +2,12 @@ package br.com.gabrielferreira.users.domain.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Data
@@ -39,6 +42,14 @@ public class RoleEntity implements Serializable {
     @JoinColumn(name = "PROJECT_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_ROLE_PROJECT_ID"))
     @ManyToOne(fetch = FetchType.LAZY)
     private ProjectEntity project;
+
+    @CreationTimestamp
+    @Column(name = "CREATED_AT", nullable = false, updatable = false, columnDefinition = "datetime")
+    private OffsetDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "UPDATED_AT", columnDefinition = "datetime")
+    private OffsetDateTime updatedAt;
 
     @PrePersist
     public void generateRoleExternalId() {
