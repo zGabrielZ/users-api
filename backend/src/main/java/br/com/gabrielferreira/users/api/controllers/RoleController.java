@@ -28,7 +28,7 @@ import java.util.UUID;
 
 @Tag(name = "Roles", description = "Role management endpoints")
 @RestController
-@RequestMapping("/roles")
+@RequestMapping("/v1/roles")
 @RequiredArgsConstructor
 public class RoleController {
 
