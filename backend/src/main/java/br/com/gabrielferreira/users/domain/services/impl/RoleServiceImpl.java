@@ -4,14 +4,17 @@ import br.com.gabrielferreira.users.domain.entities.RoleEntity;
 import br.com.gabrielferreira.users.domain.exceptions.BusinessRuleException;
 import br.com.gabrielferreira.users.domain.exceptions.RoleNotFoundException;
 import br.com.gabrielferreira.users.domain.repositories.RoleRepository;
+import br.com.gabrielferreira.users.domain.repositories.filter.RoleFilter;
 import br.com.gabrielferreira.users.domain.services.ProjectService;
 import br.com.gabrielferreira.users.domain.services.RoleService;
+import br.com.gabrielferreira.users.domain.specs.RoleSpec;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -64,8 +67,8 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public List<RoleEntity> getAllRoles(UUID projectExternalId) {
-        return roleRepository.findAllByProject_ProjectExternalId(projectExternalId);
+    public Page<RoleEntity> getAllRoles(RoleFilter filter, Pageable pageable) {
+        return roleRepository.findAll(RoleSpec.usingFilter(filter), pageable);
     }
 
     @Transactional
