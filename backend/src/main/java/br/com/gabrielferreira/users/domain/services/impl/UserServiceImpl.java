@@ -10,9 +10,11 @@ import br.com.gabrielferreira.users.domain.services.ProjectService;
 import br.com.gabrielferreira.users.domain.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -109,13 +111,20 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(userFound);
     }
 
+    // TODO: implement pagination
     @Override
     public List<UserEntity> getAllUsers(UUID projectExternalId) {
-        return List.of();
+        return Collections.emptyList();
     }
 
     @Override
     public void delete(UUID userExternalId, UUID projectExternalId) {
-
+        var userFound = getOneUser(userExternalId, projectExternalId);
+        try {
+            userRepository.delete(userFound);
+            userRepository.flush();
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessRuleException("User with ID %s cannot be removed as it is in use.".formatted(userExternalId));
+        }
     }
 }

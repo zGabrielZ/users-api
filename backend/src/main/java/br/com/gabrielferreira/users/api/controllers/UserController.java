@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Users", description = "User management endpoints")
@@ -177,5 +178,57 @@ public class UserController {
 
         var userOutputDto = userOutputMapper.toOutputDto(userEntity);
         return ResponseEntity.ok(userOutputDto);
+    }
+
+    @Operation(summary = "List all users for a project")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Users listed successfully"
+                    )
+            }
+    )
+    @GetMapping
+    public ResponseEntity<List<UserOutputDTO>> findAll(
+            @Parameter(
+                    description = "Project external identifier",
+                    example = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    required = true
+            )
+            @RequestHeader ("projectExternalId") UUID projectExternalId
+    ) {
+        var userEntities = userService.getAllUsers(projectExternalId);
+        var userOutputDtos = userEntities.stream()
+                .map(userOutputMapper::toOutputDto)
+                .toList();
+
+        return ResponseEntity.ok(userOutputDtos);
+    }
+
+    @Operation(summary = "Delete a user by external ID")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "User deleted successfully"
+            )
+    })
+    @DeleteMapping("/{userExternalId}")
+    public ResponseEntity<Void> delete(
+            @Parameter(
+                    description = "Project external identifier",
+                    example = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    required = true
+            )
+            @RequestHeader ("projectExternalId") UUID projectExternalId,
+            @Parameter(
+                    description = "External ID of the user",
+                    example = "aca0597b-c4f8-40c8-9b59-1dc86a4f401c",
+                    required = true
+            )
+            @PathVariable UUID userExternalId
+    ) {
+        userService.delete(userExternalId, projectExternalId);
+        return ResponseEntity.noContent().build();
     }
 }
