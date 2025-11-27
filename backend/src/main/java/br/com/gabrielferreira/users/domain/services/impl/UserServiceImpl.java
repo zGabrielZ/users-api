@@ -82,6 +82,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(userFound);
     }
 
+    // TODO: deve criar tres colunas (email pendente, email status pedennte, e codigo), deve encaminhar uma mensagem no topico e fazer o envio de notificacao de email mostrando o codigo
     @Transactional
     @Override
     public UserEntity updateEmail(UUID userExternalId, String newEmail, UUID projectExternalId) {
@@ -99,6 +100,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(userFound);
     }
 
+    // TODO: deve criar tres colunas (email pendente, email status pedennte, e codigo), deve encaminhar uma mensagem no topico e fazer o envio de notificacao de email mostrando o codigo
     @Transactional
     @Override
     public UserEntity updatePassword(UUID userExternalId, String oldPassword, String newPassword, UUID projectExternalId) {
@@ -110,6 +112,8 @@ public class UserServiceImpl implements UserService {
         userFound.setPassword(newPassword);
         return userRepository.save(userFound);
     }
+
+    // TODO: deve criar um outro endpoint que valida o codigo enviado por email e atualiza o email do usuario
 
     // TODO: implement pagination
     @Override
