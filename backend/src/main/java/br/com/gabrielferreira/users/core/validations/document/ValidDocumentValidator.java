@@ -23,7 +23,7 @@ public class ValidDocumentValidator implements ConstraintValidator<ValidDocument
         type = constraintAnnotation.type();
         number = constraintAnnotation.number();
         cpfValidator = new CPFValidator();
-        cpfValidator.initialize(new CPF());
+        cpfValidator.initialize(new CPFNumeric());
         cnpjValidator = new CNPJValidator();
     }
 

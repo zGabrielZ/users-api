@@ -1,10 +1,11 @@
 package br.com.gabrielferreira.users.core.validations.document;
 
 import jakarta.validation.Payload;
+import org.hibernate.validator.constraints.br.CPF;
 
 import java.lang.annotation.Annotation;
 
-public class CPF implements org.hibernate.validator.constraints.br.CPF {
+public class CPFNumeric implements CPF {
 
     @Override
     public String message() {
@@ -23,6 +24,6 @@ public class CPF implements org.hibernate.validator.constraints.br.CPF {
 
     @Override
     public Class<? extends Annotation> annotationType() {
-        return CPF.class;
+        return CPFNumeric.class;
     }
 }
