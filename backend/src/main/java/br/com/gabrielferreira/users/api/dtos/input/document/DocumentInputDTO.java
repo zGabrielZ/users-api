@@ -14,6 +14,9 @@ import java.io.Serializable;
 @Builder
 @ValidDocument(number = "number", type = "type")
 public record DocumentInputDTO(
+        // TODO: colocar outro document type que no momento aceita o CNPJ e CPF
+        // TODO: criar outro document input dto somente para usuario pf, que o tipo que ele deve informar seria somente CPF
+        // TODO: criar outros endpoints que aceita CNPJ para empresas
         @Schema(
                 description = "Document type",
                 example = "CPF"
@@ -29,12 +32,4 @@ public record DocumentInputDTO(
         String number
 ) implements Serializable {
 
-        @Override
-        public String number() {
-                return switch (type) {
-                        case CNPJ -> number.replaceAll("\\W", "");
-                        case CPF -> number.replaceAll("\\D", "");
-                        default -> number;
-                };
-        }
 }

@@ -23,6 +23,7 @@ public record DocumentOutputDTO(
         )
         DocumentType type,
 
+        // TODO: DEVE RETORNAR COM MASCARA
         @Schema(
                 description = "Document number",
                 example = "123.456.789-00"

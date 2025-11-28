@@ -1,5 +1,6 @@
 package br.com.gabrielferreira.users.domain.services.impl;
 
+import br.com.gabrielferreira.users.core.utils.Mask;
 import br.com.gabrielferreira.users.domain.entities.DocumentEntity;
 import br.com.gabrielferreira.users.domain.entities.UserEntity;
 import br.com.gabrielferreira.users.domain.enums.DocumentType;
@@ -41,8 +42,12 @@ public class UserServiceImpl implements UserService {
             throw new BusinessRuleException("Already exists a user with this email in the project");
         }
 
-        var document = userEntity.getDocument();
-        if (Objects.nonNull(document)) {
+        if (Objects.nonNull(userEntity.getDocument())) {
+            var document = DocumentEntity.builder()
+                    .number(Mask.documentWithoutMask(userEntity.getDocument().getType(), userEntity.getDocument().getNumber()))
+                    .type(userEntity.getDocument().getType())
+                    .build();
+            userEntity.setDocument(document);
             var existingUserWithDocumentAndProject = userRepository.findOneUserByDocumentAndProjectExternalId(
                     document.getType(),
                     document.getNumber(),

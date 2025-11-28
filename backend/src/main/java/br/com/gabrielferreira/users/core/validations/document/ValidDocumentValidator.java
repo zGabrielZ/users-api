@@ -1,9 +1,12 @@
 package br.com.gabrielferreira.users.core.validations.document;
 
+import br.com.gabrielferreira.users.core.utils.Mask;
 import br.com.gabrielferreira.users.domain.enums.DocumentType;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.validator.internal.constraintvalidators.hv.br.CNPJValidator;
+import org.hibernate.validator.internal.constraintvalidators.hv.br.CPFValidator;
 import org.springframework.beans.BeanUtils;
 
 import java.util.Objects;
@@ -12,23 +15,20 @@ public class ValidDocumentValidator implements ConstraintValidator<ValidDocument
 
     private String type;
     private String number;
+    private CPFValidator cpfValidator;
+    private CNPJValidator cnpjValidator;
 
     @Override
     public void initialize(ValidDocument constraintAnnotation) {
         type = constraintAnnotation.type();
         number = constraintAnnotation.number();
+        cpfValidator = new CPFValidator();
+        cpfValidator.initialize(new CPF());
+        cnpjValidator = new CNPJValidator();
     }
 
     @Override
     public boolean isValid(Object object, ConstraintValidatorContext constraintValidatorContext) {
-        if (StringUtils.isAllBlank(type, number)) {
-            constraintValidatorContext.disableDefaultConstraintViolation();
-            constraintValidatorContext
-                    .buildConstraintViolationWithTemplate("Document type and number cannot be blank.")
-                    .addConstraintViolation();
-            return false;
-        }
-
         DocumentType documentType = getDocumentTypeByProperty(object);
         String documentNumber = getNumberByProperty(object);
         if (Objects.isNull(documentType) || StringUtils.isBlank(documentNumber)) {
@@ -39,7 +39,56 @@ public class ValidDocumentValidator implements ConstraintValidator<ValidDocument
             return false;
         }
 
-        // TODO: Validar número do documento conforme o tipo
+        return switch (documentType) {
+            case CPF -> isCpfValid(documentNumber, constraintValidatorContext);
+            case CNPJ  -> isCnpjValid(documentType, documentNumber, constraintValidatorContext);
+            default -> true;
+        };
+    }
+
+    private boolean isCnpjValid(DocumentType documentType, String documentNumber, ConstraintValidatorContext constraintValidatorContext) {
+        boolean isOnlyNumeric = Mask.isOnlyNumeric(documentType, documentNumber);
+        if (isOnlyNumeric) {
+            cnpjValidator.initialize(new CNPJNumeric());
+        } else {
+            cnpjValidator.initialize(new CNPJAlphanumeric());
+        }
+
+        if (!cnpjValidator.isValid(documentNumber, constraintValidatorContext)) {
+            constraintValidatorContext.disableDefaultConstraintViolation();
+            constraintValidatorContext
+                    .buildConstraintViolationWithTemplate("Invalid CNPJ number.")
+                    .addConstraintViolation();
+            return false;
+        }
+
+        if (isOnlyNumeric && Mask.isSequential(documentNumber)) {
+            constraintValidatorContext.disableDefaultConstraintViolation();
+            constraintValidatorContext
+                    .buildConstraintViolationWithTemplate("CNPJ number cannot be sequential digits.")
+                    .addConstraintViolation();
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean isCpfValid(String documentNumber, ConstraintValidatorContext constraintValidatorContext) {
+        if (!cpfValidator.isValid(documentNumber, constraintValidatorContext)) {
+            constraintValidatorContext.disableDefaultConstraintViolation();
+            constraintValidatorContext
+                    .buildConstraintViolationWithTemplate("Invalid CPF number.")
+                    .addConstraintViolation();
+            return false;
+        }
+
+        if (Mask.isSequential(documentNumber)) {
+            constraintValidatorContext.disableDefaultConstraintViolation();
+            constraintValidatorContext
+                    .buildConstraintViolationWithTemplate("CPF number cannot be sequential digits.")
+                    .addConstraintViolation();
+            return false;
+        }
 
         return true;
     }
