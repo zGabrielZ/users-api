@@ -12,6 +12,7 @@ import br.com.gabrielferreira.users.domain.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,8 @@ public class UserServiceImpl implements UserService {
 
     private final ProjectService projectService;
 
+    private final PasswordEncoder passwordEncoder;
+
     @Transactional
     @Override
     public UserEntity save(UserEntity userEntity, UUID projectExternalId) {
@@ -35,10 +38,9 @@ public class UserServiceImpl implements UserService {
         userEntity.setProject(project);
 
         validateExistingUserWithEmailAndProject(userEntity.getEmail(), projectExternalId);
-        setUpDefaultValueDocument(userEntity);
+        applyDefaultDocumentValues(userEntity);
 
-        // TODO:  criptografar a senha antes de salvar
-
+        userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
         return userRepository.save(userEntity);
     }
 
@@ -145,7 +147,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void setUpDefaultValueDocument(UserEntity userEntity) {
+    private void applyDefaultDocumentValues(UserEntity userEntity) {
         if (Objects.isNull(userEntity.getDocument())) {
             var documentEntity = DocumentEntity.builder()
                     .type(DocumentType.NONE)
