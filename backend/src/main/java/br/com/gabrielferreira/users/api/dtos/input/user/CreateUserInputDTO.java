@@ -1,10 +1,8 @@
 package br.com.gabrielferreira.users.api.dtos.input.user;
 
-import br.com.gabrielferreira.users.api.dtos.input.document.DocumentInputDTO;
 import br.com.gabrielferreira.users.core.validations.password.ValidPassword;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
@@ -55,12 +53,7 @@ public record CreateUserInputDTO(
                 max = 255
         )
         @ValidPassword
-        String password,
-
-        @Schema(
-                description = "User document information"
-        )
-        @Valid
-        DocumentInputDTO document
+        String password
 ) implements Serializable {
+
 }

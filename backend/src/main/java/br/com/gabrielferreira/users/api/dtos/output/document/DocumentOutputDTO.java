@@ -1,5 +1,6 @@
 package br.com.gabrielferreira.users.api.dtos.output.document;
 
+import br.com.gabrielferreira.users.core.utils.Mask;
 import br.com.gabrielferreira.users.domain.enums.DocumentType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,11 +24,15 @@ public record DocumentOutputDTO(
         )
         DocumentType type,
 
-        // TODO: DEVE RETORNAR COM MASCARA
         @Schema(
                 description = "Document number",
                 example = "123.456.789-00"
         )
         String number
 ) implements Serializable {
+
+        @Override
+        public String number() {
+                return Mask.formatDocument(this.type, this.number);
+        }
 }

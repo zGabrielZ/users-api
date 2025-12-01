@@ -13,11 +13,7 @@ public class ValidPasswordValidator implements ConstraintValidator<ValidPassword
     @Override
     public boolean isValid(String password, ConstraintValidatorContext constraintValidatorContext) {
         if (StringUtils.isBlank(password)) {
-            constraintValidatorContext.disableDefaultConstraintViolation();
-            constraintValidatorContext
-                    .buildConstraintViolationWithTemplate("Password cannot be blank.")
-                    .addConstraintViolation();
-            return false;
+            return true;
         }
 
         List<String> errors = new ArrayList<>();

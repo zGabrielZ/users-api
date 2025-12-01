@@ -1,5 +1,6 @@
 package br.com.gabrielferreira.users.domain.services;
 
+import br.com.gabrielferreira.users.domain.entities.DocumentEntity;
 import br.com.gabrielferreira.users.domain.entities.UserEntity;
 
 import java.util.List;
@@ -12,6 +13,8 @@ public interface UserService {
     UserEntity getOneUser(UUID userExternalId, UUID projectExternalId);
 
     UserEntity update(UUID userExternalId, UserEntity userEntity, UUID projectExternalId);
+
+    UserEntity updateDocument(UUID userExternalId, DocumentEntity documentEntity, UUID projectExternalId);
 
     UserEntity updateEmail(UUID userExternalId, String newEmail, UUID projectExternalId);
 

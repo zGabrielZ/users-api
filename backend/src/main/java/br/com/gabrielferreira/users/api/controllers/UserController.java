@@ -1,9 +1,6 @@
 package br.com.gabrielferreira.users.api.controllers;
 
-import br.com.gabrielferreira.users.api.dtos.input.user.CreateUserInputDTO;
-import br.com.gabrielferreira.users.api.dtos.input.user.UpdateEmailUserInputDTO;
-import br.com.gabrielferreira.users.api.dtos.input.user.UpdatePasswordUserInputDTO;
-import br.com.gabrielferreira.users.api.dtos.input.user.UpdateUserInputDTO;
+import br.com.gabrielferreira.users.api.dtos.input.user.*;
 import br.com.gabrielferreira.users.api.dtos.output.user.UserOutputDTO;
 import br.com.gabrielferreira.users.api.mappers.user.input.UserInputMapper;
 import br.com.gabrielferreira.users.api.mappers.user.output.UserOutputMapper;
@@ -112,6 +109,36 @@ public class UserController {
     ) {
         var userEntity = userInputMapper.toEntity(payload);
         userEntity = userService.update(userExternalId, userEntity, projectExternalId);
+
+        var userOutputDto = userOutputMapper.toOutputDto(userEntity);
+        return ResponseEntity.ok(userOutputDto);
+    }
+
+    @Operation(summary = "Update user's document")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "User document updated successfully"
+            )
+    })
+    @PutMapping("/{userExternalId}/document")
+    public ResponseEntity<UserOutputDTO> updateDocument(
+            @Parameter(
+                    description = "Project external identifier",
+                    example = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    required = true
+            )
+            @RequestHeader ("projectExternalId") UUID projectExternalId,
+            @Parameter(
+                    description = "External ID of the user",
+                    example = "aca0597b-c4f8-40c8-9b59-1dc86a4f401c",
+                    required = true
+            )
+            @PathVariable UUID userExternalId,
+            @Valid @RequestBody UpdateDocumentUserInputDTO payload
+    ) {
+        var documentEntity = userInputMapper.toEntity(payload);
+        var userEntity = userService.updateDocument(userExternalId, documentEntity, projectExternalId);
 
         var userOutputDto = userOutputMapper.toOutputDto(userEntity);
         return ResponseEntity.ok(userOutputDto);

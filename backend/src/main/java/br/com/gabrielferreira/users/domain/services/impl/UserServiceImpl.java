@@ -34,39 +34,10 @@ public class UserServiceImpl implements UserService {
         var project = projectService.getOneProject(projectExternalId);
         userEntity.setProject(project);
 
-        var existingUserWithEmailAndProject = userRepository.findOneByEmailAndProject_ProjectExternalId(
-                userEntity.getEmail(),
-                projectExternalId
-        );
-        if (existingUserWithEmailAndProject.isPresent()) {
-            throw new BusinessRuleException("Already exists a user with this email in the project");
-        }
-
-        if (Objects.nonNull(userEntity.getDocument())) {
-            var document = DocumentEntity.builder()
-                    .number(Mask.documentWithoutMask(userEntity.getDocument().getType(), userEntity.getDocument().getNumber()))
-                    .type(userEntity.getDocument().getType())
-                    .build();
-            userEntity.setDocument(document);
-            var existingUserWithDocumentAndProject = userRepository.findOneUserByDocumentAndProjectExternalId(
-                    document.getType(),
-                    document.getNumber(),
-                    projectExternalId
-            );
-            if (existingUserWithDocumentAndProject.isPresent()) {
-                throw new BusinessRuleException("Already exists a user with this document in the project");
-            }
-        }
+        validateExistingUserWithEmailAndProject(userEntity.getEmail(), projectExternalId);
+        setUpDefaultValueDocument(userEntity);
 
         // TODO:  criptografar a senha antes de salvar
-
-        if (Objects.isNull(userEntity.getDocument())) {
-            var documentEntity = DocumentEntity.builder()
-                    .type(DocumentType.NONE)
-                    .user(userEntity)
-                    .build();
-            userEntity.setDocument(documentEntity);
-        }
 
         return userRepository.save(userEntity);
     }
@@ -84,6 +55,22 @@ public class UserServiceImpl implements UserService {
 
         userFound.setFirstName(userEntity.getFirstName());
         userFound.setLastName(userEntity.getLastName());
+        return userRepository.save(userFound);
+    }
+
+    @Transactional
+    @Override
+    public UserEntity updateDocument(UUID userExternalId, DocumentEntity documentEntity, UUID projectExternalId) {
+        var userFound = getOneUser(userExternalId, projectExternalId);
+        var document = userFound.getDocument();
+        documentEntity.setNumber(Mask.documentWithoutMask(documentEntity.getType(), documentEntity.getNumber()));
+
+        validateExistingUserWithDocument(document);
+        validateExistingUserWithDocumentAndProject(documentEntity, projectExternalId);
+
+        document.setType(documentEntity.getType());
+        document.setNumber(documentEntity.getNumber());
+        userFound.setDocument(document);
         return userRepository.save(userFound);
     }
 
@@ -134,6 +121,43 @@ public class UserServiceImpl implements UserService {
             userRepository.flush();
         } catch (DataIntegrityViolationException e) {
             throw new BusinessRuleException("User with ID %s cannot be removed as it is in use.".formatted(userExternalId));
+        }
+    }
+
+    private void validateExistingUserWithEmailAndProject(String email, UUID projectExternalId) {
+        var existingUserWithEmailAndProject = userRepository.findOneByEmailAndProject_ProjectExternalId(
+                email,
+                projectExternalId
+        );
+        if (existingUserWithEmailAndProject.isPresent()) {
+            throw new BusinessRuleException("Already exists a user with this email in the project");
+        }
+    }
+
+    private void validateExistingUserWithDocumentAndProject(DocumentEntity document, UUID projectExternalId) {
+        var existingUserWithDocumentAndProject = userRepository.findOneUserByDocumentAndProjectExternalId(
+                document.getType(),
+                document.getNumber(),
+                projectExternalId
+        );
+        if (existingUserWithDocumentAndProject.isPresent()) {
+            throw new BusinessRuleException("Already exists a user with this document in the project");
+        }
+    }
+
+    private void setUpDefaultValueDocument(UserEntity userEntity) {
+        if (Objects.isNull(userEntity.getDocument())) {
+            var documentEntity = DocumentEntity.builder()
+                    .type(DocumentType.NONE)
+                    .user(userEntity)
+                    .build();
+            userEntity.setDocument(documentEntity);
+        }
+    }
+
+    private void validateExistingUserWithDocument(DocumentEntity document) {
+        if (Objects.nonNull(document) && StringUtils.isNotBlank(document.getNumber())) {
+            throw new BusinessRuleException("User already has a document registered");
         }
     }
 }

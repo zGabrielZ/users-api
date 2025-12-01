@@ -49,4 +49,19 @@ public class Mask {
             default -> documentNumber;
         };
     }
+
+    public static String formatDocument(DocumentType type, String documentNumber) {
+        return switch (type) {
+            case CPF -> {
+                documentNumber = documentWithoutMask(type, documentNumber);
+                yield documentNumber.replaceFirst("(\\d{3})(\\d{3})(\\d{3})(\\d{2})", "$1.$2.$3-$4");
+            }
+            case CNPJ -> {
+                documentNumber = documentWithoutMask(type, documentNumber);
+                // TODO: precisaria ver uma solucao pra aceitar cnpj alfanumerico
+                yield documentNumber;
+            }
+            default -> documentNumber;
+        };
+    }
 }

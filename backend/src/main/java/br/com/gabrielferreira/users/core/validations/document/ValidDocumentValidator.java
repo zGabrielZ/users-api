@@ -32,11 +32,7 @@ public class ValidDocumentValidator implements ConstraintValidator<ValidDocument
         DocumentType documentType = getDocumentTypeByProperty(object);
         String documentNumber = getNumberByProperty(object);
         if (Objects.isNull(documentType) || StringUtils.isBlank(documentNumber)) {
-            constraintValidatorContext.disableDefaultConstraintViolation();
-            constraintValidatorContext
-                    .buildConstraintViolationWithTemplate("Document type and number cannot be blank.")
-                    .addConstraintViolation();
-            return false;
+            return true;
         }
 
         return switch (documentType) {
@@ -58,6 +54,7 @@ public class ValidDocumentValidator implements ConstraintValidator<ValidDocument
             constraintValidatorContext.disableDefaultConstraintViolation();
             constraintValidatorContext
                     .buildConstraintViolationWithTemplate("Invalid CNPJ number.")
+                    .addPropertyNode("number")
                     .addConstraintViolation();
             return false;
         }
@@ -66,6 +63,7 @@ public class ValidDocumentValidator implements ConstraintValidator<ValidDocument
             constraintValidatorContext.disableDefaultConstraintViolation();
             constraintValidatorContext
                     .buildConstraintViolationWithTemplate("CNPJ number cannot be sequential digits.")
+                    .addPropertyNode("number")
                     .addConstraintViolation();
             return false;
         }
@@ -78,6 +76,7 @@ public class ValidDocumentValidator implements ConstraintValidator<ValidDocument
             constraintValidatorContext.disableDefaultConstraintViolation();
             constraintValidatorContext
                     .buildConstraintViolationWithTemplate("Invalid CPF number.")
+                    .addPropertyNode("number")
                     .addConstraintViolation();
             return false;
         }
@@ -86,6 +85,7 @@ public class ValidDocumentValidator implements ConstraintValidator<ValidDocument
             constraintValidatorContext.disableDefaultConstraintViolation();
             constraintValidatorContext
                     .buildConstraintViolationWithTemplate("CPF number cannot be sequential digits.")
+                    .addPropertyNode("number")
                     .addConstraintViolation();
             return false;
         }
