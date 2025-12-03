@@ -1,6 +1,7 @@
 package br.com.gabrielferreira.users.domain.services;
 
 import br.com.gabrielferreira.users.domain.entities.RoleEntity;
+import br.com.gabrielferreira.users.domain.repositories.filter.RoleFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -12,5 +13,5 @@ public interface UserRoleService {
 
     void disassociateRole(UUID userExternalId, UUID roleExternalId, UUID projectExternalId);
 
-    Page<RoleEntity> listRolesByUser(UUID userExternalId, UUID roleExternalId, UUID projectExternalId, Pageable pageable);
+    Page<RoleEntity> listRolesByUser(UUID userExternalId, Pageable pageable, RoleFilter filter);
 }

@@ -8,6 +8,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -42,6 +44,12 @@ public class RoleEntity implements Serializable {
     @JoinColumn(name = "PROJECT_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_ROLE_PROJECT_ID"))
     @ManyToOne(fetch = FetchType.LAZY)
     private ProjectEntity project;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "TB_USER_ROLE",
+            joinColumns = @JoinColumn(name = "ROLE_ID", referencedColumnName = "ID", table = "TB_ROLE"),
+            inverseJoinColumns = @JoinColumn(name = "USER_ID", referencedColumnName = "ID", table = "TB_USER"))
+    private List<UserEntity> users = new ArrayList<>();
 
     @CreationTimestamp
     @Column(name = "CREATED_AT", nullable = false, updatable = false, columnDefinition = "datetime")
