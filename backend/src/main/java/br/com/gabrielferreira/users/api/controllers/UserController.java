@@ -4,6 +4,8 @@ import br.com.gabrielferreira.users.api.dtos.input.user.*;
 import br.com.gabrielferreira.users.api.dtos.output.user.UserOutputDTO;
 import br.com.gabrielferreira.users.api.mappers.user.input.UserInputMapper;
 import br.com.gabrielferreira.users.api.mappers.user.output.UserOutputMapper;
+import br.com.gabrielferreira.users.domain.entities.DocumentEntity;
+import br.com.gabrielferreira.users.domain.entities.UserEntity;
 import br.com.gabrielferreira.users.domain.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -48,10 +50,10 @@ public class UserController {
             @RequestHeader("projectExternalId") UUID projectExternalId,
             @Valid @RequestBody CreateUserInputDTO payload
     ) {
-        var userEntity = userInputMapper.toEntity(payload);
+        UserEntity userEntity = userInputMapper.toEntity(payload);
         userEntity = userService.save(userEntity, projectExternalId);
 
-        var userOutputDto = userOutputMapper.toOutputDto(userEntity);
+        UserOutputDTO userOutputDto = userOutputMapper.toOutputDto(userEntity);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(userOutputDto);
     }
@@ -78,9 +80,9 @@ public class UserController {
             )
             @PathVariable UUID userExternalId
     ) {
-        var userEntity = userService.getOneUser(userExternalId, projectExternalId);
+        UserEntity userEntity = userService.getOneUser(userExternalId, projectExternalId);
 
-        var userOutputDto = userOutputMapper.toOutputDto(userEntity);
+        UserOutputDTO userOutputDto = userOutputMapper.toOutputDto(userEntity);
         return ResponseEntity.ok(userOutputDto);
     }
 
@@ -107,10 +109,10 @@ public class UserController {
             @PathVariable UUID userExternalId,
             @Valid @RequestBody UpdateUserInputDTO payload
     ) {
-        var userEntity = userInputMapper.toEntity(payload);
+        UserEntity userEntity = userInputMapper.toEntity(payload);
         userEntity = userService.update(userExternalId, userEntity, projectExternalId);
 
-        var userOutputDto = userOutputMapper.toOutputDto(userEntity);
+        UserOutputDTO userOutputDto = userOutputMapper.toOutputDto(userEntity);
         return ResponseEntity.ok(userOutputDto);
     }
 
@@ -137,10 +139,10 @@ public class UserController {
             @PathVariable UUID userExternalId,
             @Valid @RequestBody UpdateDocumentUserInputDTO payload
     ) {
-        var documentEntity = userInputMapper.toEntity(payload);
-        var userEntity = userService.updateDocument(userExternalId, documentEntity, projectExternalId);
+        DocumentEntity documentEntity = userInputMapper.toEntity(payload);
+        UserEntity userEntity = userService.updateDocument(userExternalId, documentEntity, projectExternalId);
 
-        var userOutputDto = userOutputMapper.toOutputDto(userEntity);
+        UserOutputDTO userOutputDto = userOutputMapper.toOutputDto(userEntity);
         return ResponseEntity.ok(userOutputDto);
     }
 
@@ -167,9 +169,9 @@ public class UserController {
             @PathVariable UUID userExternalId,
             @Valid @RequestBody UpdateEmailUserInputDTO payload
     ) {
-        var userEntity = userService.updateEmail(userExternalId, payload.email(), projectExternalId);
+        UserEntity userEntity = userService.updateEmail(userExternalId, payload.email(), projectExternalId);
 
-        var userOutputDto = userOutputMapper.toOutputDto(userEntity);
+        UserOutputDTO userOutputDto = userOutputMapper.toOutputDto(userEntity);
         return ResponseEntity.ok(userOutputDto);
     }
 
@@ -196,14 +198,14 @@ public class UserController {
             @PathVariable UUID userExternalId,
             @Valid @RequestBody UpdatePasswordUserInputDTO payload
     ) {
-        var userEntity = userService.updatePassword(
+        UserEntity userEntity = userService.updatePassword(
                 userExternalId,
                 payload.oldPassword(),
                 payload.newPassword(),
                 projectExternalId
         );
 
-        var userOutputDto = userOutputMapper.toOutputDto(userEntity);
+        UserOutputDTO userOutputDto = userOutputMapper.toOutputDto(userEntity);
         return ResponseEntity.ok(userOutputDto);
     }
 
@@ -225,8 +227,8 @@ public class UserController {
             )
             @RequestHeader ("projectExternalId") UUID projectExternalId
     ) {
-        var userEntities = userService.getAllUsers(projectExternalId);
-        var userOutputDtos = userEntities.stream()
+        List<UserEntity> userEntities = userService.getAllUsers(projectExternalId);
+        List<UserOutputDTO> userOutputDtos = userEntities.stream()
                 .map(userOutputMapper::toOutputDto)
                 .toList();
 

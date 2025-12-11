@@ -16,6 +16,7 @@ public record ProblemDetailDTO(
                 example = "400"
         )
         Integer status,
+        // TODO: VERIFICAR SE PRECISA COLOCAR O TYPE MESMO
         @Schema(
                 description = "URI identifying the type of problem",
                 example = "https://example.com/probs/invalid-data"

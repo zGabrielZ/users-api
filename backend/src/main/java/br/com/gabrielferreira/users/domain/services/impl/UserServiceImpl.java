@@ -2,11 +2,13 @@ package br.com.gabrielferreira.users.domain.services.impl;
 
 import br.com.gabrielferreira.users.core.utils.Mask;
 import br.com.gabrielferreira.users.domain.entities.DocumentEntity;
+import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
 import br.com.gabrielferreira.users.domain.entities.UserEntity;
 import br.com.gabrielferreira.users.domain.enums.DocumentType;
 import br.com.gabrielferreira.users.domain.exceptions.BusinessRuleException;
 import br.com.gabrielferreira.users.domain.exceptions.UserNotFoundException;
 import br.com.gabrielferreira.users.domain.repositories.UserRepository;
+import br.com.gabrielferreira.users.domain.repositories.projection.SummaryUserProjection;
 import br.com.gabrielferreira.users.domain.services.ProjectService;
 import br.com.gabrielferreira.users.domain.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -16,10 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +33,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserEntity save(UserEntity userEntity, UUID projectExternalId) {
-        var project = projectService.getOneProject(projectExternalId);
+        ProjectEntity project = projectService.getOneProject(projectExternalId);
         userEntity.setProject(project);
 
         validateExistingUserWithEmailAndProject(userEntity.getEmail(), projectExternalId);
@@ -53,7 +52,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserEntity update(UUID userExternalId, UserEntity userEntity, UUID projectExternalId) {
-        var userFound = getOneUser(userExternalId, projectExternalId);
+        UserEntity userFound = getOneUser(userExternalId, projectExternalId);
 
         userFound.setFirstName(userEntity.getFirstName());
         userFound.setLastName(userEntity.getLastName());
@@ -63,8 +62,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserEntity updateDocument(UUID userExternalId, DocumentEntity documentEntity, UUID projectExternalId) {
-        var userFound = getOneUser(userExternalId, projectExternalId);
-        var document = userFound.getDocument();
+        UserEntity userFound = getOneUser(userExternalId, projectExternalId);
+        DocumentEntity document = userFound.getDocument();
         documentEntity.setNumber(Mask.documentWithoutMask(documentEntity.getType(), documentEntity.getNumber()));
 
         validateExistingUserWithDocument(document);
@@ -80,8 +79,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserEntity updateEmail(UUID userExternalId, String newEmail, UUID projectExternalId) {
-        var userFound = getOneUser(userExternalId, projectExternalId);
-        var existingUserWithEmailAndProject = userRepository.findOneByEmailAndProject_ProjectExternalId(
+        UserEntity userFound = getOneUser(userExternalId, projectExternalId);
+        Optional<SummaryUserProjection> existingUserWithEmailAndProject = userRepository.findOneByEmailAndProject_ProjectExternalId(
                 newEmail,
                 projectExternalId
         );
@@ -98,7 +97,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserEntity updatePassword(UUID userExternalId, String oldPassword, String newPassword, UUID projectExternalId) {
-        var userFound = getOneUser(userExternalId, projectExternalId);
+        UserEntity userFound = getOneUser(userExternalId, projectExternalId);
         if (!StringUtils.equals(oldPassword, userFound.getPassword())) {
             throw new BusinessRuleException("Old password does not match");
         }
@@ -117,7 +116,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(UUID userExternalId, UUID projectExternalId) {
-        var userFound = getOneUser(userExternalId, projectExternalId);
+        UserEntity userFound = getOneUser(userExternalId, projectExternalId);
         try {
             userRepository.delete(userFound);
             userRepository.flush();
@@ -127,7 +126,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void validateExistingUserWithEmailAndProject(String email, UUID projectExternalId) {
-        var existingUserWithEmailAndProject = userRepository.findOneByEmailAndProject_ProjectExternalId(
+        Optional<SummaryUserProjection> existingUserWithEmailAndProject = userRepository.findOneByEmailAndProject_ProjectExternalId(
                 email,
                 projectExternalId
         );
@@ -137,7 +136,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void validateExistingUserWithDocumentAndProject(DocumentEntity document, UUID projectExternalId) {
-        var existingUserWithDocumentAndProject = userRepository.findOneUserByDocumentAndProjectExternalId(
+        Optional<SummaryUserProjection> existingUserWithDocumentAndProject = userRepository.findOneUserByDocumentAndProjectExternalId(
                 document.getType(),
                 document.getNumber(),
                 projectExternalId

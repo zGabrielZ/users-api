@@ -6,6 +6,7 @@ import br.com.gabrielferreira.users.domain.exceptions.EntityInUseException;
 import br.com.gabrielferreira.users.domain.exceptions.ProjectNotFoundException;
 import br.com.gabrielferreira.users.domain.repositories.ProjectRepository;
 import br.com.gabrielferreira.users.domain.repositories.filter.ProjectFilter;
+import br.com.gabrielferreira.users.domain.repositories.projection.SummaryProjectProjection;
 import br.com.gabrielferreira.users.domain.services.ProjectService;
 import br.com.gabrielferreira.users.domain.specs.ProjectSpec;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -27,7 +29,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     @Override
     public ProjectEntity save(ProjectEntity projectEntity) {
-        var existingProjectWithName = projectRepository.findOneByName(projectEntity.getName());
+        Optional<SummaryProjectProjection> existingProjectWithName = projectRepository.findOneByName(projectEntity.getName());
         if (existingProjectWithName.isPresent()) {
             throw new BusinessRuleException("A project with the name '%s' already exists.".formatted(projectEntity.getName()));
         }
@@ -43,8 +45,8 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     @Override
     public ProjectEntity update(UUID projectExternalId, ProjectEntity projectEntity) {
-        var projectFound = getOneProject(projectExternalId);
-        var existingProjectWithName = projectRepository.findOneByName(projectEntity.getName());
+        ProjectEntity projectFound = getOneProject(projectExternalId);
+        Optional<SummaryProjectProjection> existingProjectWithName = projectRepository.findOneByName(projectEntity.getName());
         if (existingProjectWithName.isPresent() && !Objects.equals(projectFound.getProjectExternalId(), existingProjectWithName.get().getProjectExternalId())) {
             throw new BusinessRuleException("A project with the name '%s' already exists.".formatted(projectEntity.getName()));
         }
@@ -61,7 +63,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     @Override
     public void delete(UUID projectExternalId) {
-        var projectFound = getOneProject(projectExternalId);
+        ProjectEntity projectFound = getOneProject(projectExternalId);
         try {
             projectRepository.delete(projectFound);
             projectRepository.flush();

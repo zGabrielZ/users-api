@@ -8,6 +8,8 @@ import br.com.gabrielferreira.users.api.dtos.output.project.ProjectOutputDTO;
 import br.com.gabrielferreira.users.api.mappers.project.input.ProjectInputMapper;
 import br.com.gabrielferreira.users.api.mappers.project.output.ProjectOutputMapper;
 import br.com.gabrielferreira.users.core.utils.PageTranslate;
+import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
+import br.com.gabrielferreira.users.domain.repositories.filter.ProjectFilter;
 import br.com.gabrielferreira.users.domain.services.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,6 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -47,10 +50,10 @@ public class ProjectController {
     })
     @PostMapping
     public ResponseEntity<ProjectOutputDTO> create(@Valid @RequestBody CreateProjectInputDTO payload) {
-        var projectEntity = projectInputMapper.toProjectEntity(payload);
+        ProjectEntity projectEntity = projectInputMapper.toProjectEntity(payload);
         projectEntity = projectService.save(projectEntity);
 
-        var projectOutputDTO = projectOutputMapper.toProjectOutputDto(projectEntity);
+        ProjectOutputDTO projectOutputDTO = projectOutputMapper.toProjectOutputDto(projectEntity);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(projectOutputDTO);
     }
@@ -70,9 +73,9 @@ public class ProjectController {
                     required = true
             )
             @PathVariable UUID projectExternalId) {
-        var projectEntity = projectService.getOneProject(projectExternalId);
+        ProjectEntity projectEntity = projectService.getOneProject(projectExternalId);
 
-        var projectOutputDTO = projectOutputMapper.toProjectOutputDto(projectEntity);
+        ProjectOutputDTO projectOutputDTO = projectOutputMapper.toProjectOutputDto(projectEntity);
         return ResponseEntity.ok(projectOutputDTO);
     }
 
@@ -92,10 +95,10 @@ public class ProjectController {
             )
             @PathVariable UUID projectExternalId,
             @Valid @RequestBody UpdateProjectInputDTO payload) {
-        var projectEntity = projectInputMapper.toProjectEntity(payload);
+        ProjectEntity projectEntity = projectInputMapper.toProjectEntity(payload);
         projectEntity = projectService.update(projectExternalId, projectEntity);
 
-        var projectOutputDTO = projectOutputMapper.toProjectOutputDto(projectEntity);
+        ProjectOutputDTO projectOutputDTO = projectOutputMapper.toProjectOutputDto(projectEntity);
         return ResponseEntity.ok(projectOutputDTO);
     }
 
@@ -112,10 +115,10 @@ public class ProjectController {
             Pageable pageable,
             ProjectFilterDTO filter) {
         pageable = PageTranslate.toPageable(pageable, PageTranslate.getProjectPageableFieldsMapping());
-        var projectFilter = projectInputMapper.toProjectFilter(filter);
-        var projectEntities = projectService.getAllProjects(projectFilter, pageable);
+        ProjectFilter projectFilter = projectInputMapper.toProjectFilter(filter);
+        Page<ProjectEntity> projectEntities = projectService.getAllProjects(projectFilter, pageable);
 
-        var projectOutputDTOs = projectOutputMapper.toPageDto(projectEntities);
+        PageResponse<ProjectOutputDTO> projectOutputDTOs = projectOutputMapper.toPageDto(projectEntities);
         return ResponseEntity.ok(projectOutputDTOs);
     }
 

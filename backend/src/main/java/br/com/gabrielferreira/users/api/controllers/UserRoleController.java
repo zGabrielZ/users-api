@@ -6,6 +6,8 @@ import br.com.gabrielferreira.users.api.dtos.output.role.RoleOutputDTO;
 import br.com.gabrielferreira.users.api.mappers.role.input.RoleInputMapper;
 import br.com.gabrielferreira.users.api.mappers.role.output.RoleOutputMapper;
 import br.com.gabrielferreira.users.core.utils.PageTranslate;
+import br.com.gabrielferreira.users.domain.entities.RoleEntity;
+import br.com.gabrielferreira.users.domain.repositories.filter.RoleFilter;
 import br.com.gabrielferreira.users.domain.services.UserRoleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -125,10 +128,10 @@ public class UserRoleController {
             @PathVariable UUID userExternalId
     ) {
         pageable = PageTranslate.toPageable(pageable, PageTranslate.getRolePageableFieldsMapping());
-        var roleFilter = roleInputMapper.toRoleFilter(filter, projectExternalId);
-        var roleEntities = userRoleService.listRolesByUser(userExternalId, pageable, roleFilter);
+        RoleFilter roleFilter = roleInputMapper.toRoleFilter(filter, projectExternalId);
+        Page<RoleEntity> roleEntities = userRoleService.listRolesByUser(userExternalId, pageable, roleFilter);
 
-        var roleOutputDto = roleOutputMapper.toPageDto(roleEntities);
+        PageResponse<RoleOutputDTO> roleOutputDto = roleOutputMapper.toPageDto(roleEntities);
         return ResponseEntity.ok(roleOutputDto);
     }
 }

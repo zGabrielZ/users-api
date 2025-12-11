@@ -8,6 +8,8 @@ import br.com.gabrielferreira.users.api.dtos.output.role.RoleOutputDTO;
 import br.com.gabrielferreira.users.api.mappers.role.input.RoleInputMapper;
 import br.com.gabrielferreira.users.api.mappers.role.output.RoleOutputMapper;
 import br.com.gabrielferreira.users.core.utils.PageTranslate;
+import br.com.gabrielferreira.users.domain.entities.RoleEntity;
+import br.com.gabrielferreira.users.domain.repositories.filter.RoleFilter;
 import br.com.gabrielferreira.users.domain.services.RoleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,6 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -55,10 +58,10 @@ public class RoleController {
             @RequestHeader ("projectExternalId") UUID projectExternalId,
             @Valid @RequestBody CreateRoleInputDTO payload
     ) {
-        var roleEntity = roleInputMapper.toEntity(payload);
+        RoleEntity roleEntity = roleInputMapper.toEntity(payload);
         roleEntity = roleService.save(roleEntity, projectExternalId);
 
-        var roleOutputDto = roleOutputMapper.toOutputDto(roleEntity);
+        RoleOutputDTO roleOutputDto = roleOutputMapper.toOutputDto(roleEntity);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(roleOutputDto);
     }
@@ -85,9 +88,9 @@ public class RoleController {
             )
             @PathVariable UUID roleExternalId
     ) {
-        var roleEntity = roleService.getOneRole(roleExternalId, projectExternalId);
+        RoleEntity roleEntity = roleService.getOneRole(roleExternalId, projectExternalId);
 
-        var roleOutputDto = roleOutputMapper.toOutputDto(roleEntity);
+        RoleOutputDTO roleOutputDto = roleOutputMapper.toOutputDto(roleEntity);
         return ResponseEntity.ok(roleOutputDto);
     }
 
@@ -114,14 +117,14 @@ public class RoleController {
             @PathVariable UUID roleExternalId,
             @Valid @RequestBody UpdateRoleInputDTO payload
     ) {
-        var roleEntity = roleInputMapper.toEntity(payload);
+        RoleEntity roleEntity = roleInputMapper.toEntity(payload);
         roleEntity = roleService.update(
                 roleExternalId,
                 roleEntity,
                 projectExternalId
         );
 
-        var roleOutputDto = roleOutputMapper.toOutputDto(roleEntity);
+        RoleOutputDTO roleOutputDto = roleOutputMapper.toOutputDto(roleEntity);
         return ResponseEntity.ok(roleOutputDto);
     }
 
@@ -145,10 +148,10 @@ public class RoleController {
             @RequestHeader ("projectExternalId") UUID projectExternalId
     ) {
         pageable = PageTranslate.toPageable(pageable, PageTranslate.getRolePageableFieldsMapping());
-        var roleFilter = roleInputMapper.toRoleFilter(filter, projectExternalId);
-        var roleEntities = roleService.getAllRoles(roleFilter, pageable);
+        RoleFilter roleFilter = roleInputMapper.toRoleFilter(filter, projectExternalId);
+        Page<RoleEntity> roleEntities = roleService.getAllRoles(roleFilter, pageable);
 
-        var roleOutputDto = roleOutputMapper.toPageDto(roleEntities);
+        PageResponse<RoleOutputDTO> roleOutputDto = roleOutputMapper.toPageDto(roleEntities);
         return ResponseEntity.ok(roleOutputDto);
     }
 

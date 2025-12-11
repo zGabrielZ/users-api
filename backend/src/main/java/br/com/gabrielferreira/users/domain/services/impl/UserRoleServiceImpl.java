@@ -1,6 +1,7 @@
 package br.com.gabrielferreira.users.domain.services.impl;
 
 import br.com.gabrielferreira.users.domain.entities.RoleEntity;
+import br.com.gabrielferreira.users.domain.entities.UserEntity;
 import br.com.gabrielferreira.users.domain.repositories.RoleRepository;
 import br.com.gabrielferreira.users.domain.repositories.filter.RoleFilter;
 import br.com.gabrielferreira.users.domain.services.RoleService;
@@ -30,8 +31,8 @@ public class UserRoleServiceImpl implements UserRoleService {
     @Transactional
     @Override
     public void associateRole(UUID userExternalId, UUID roleExternalId, UUID projectExternalId) {
-        var userFound = userService.getOneUser(userExternalId, projectExternalId);
-        var roleFound = roleService.getOneRole(roleExternalId, projectExternalId);
+        UserEntity userFound = userService.getOneUser(userExternalId, projectExternalId);
+        RoleEntity roleFound = roleService.getOneRole(roleExternalId, projectExternalId);
 
         if (!hasRoleAssignedToUser(roleFound, userFound.getRoles())) {
             userFound.getRoles().add(roleFound);
@@ -41,8 +42,8 @@ public class UserRoleServiceImpl implements UserRoleService {
     @Transactional
     @Override
     public void disassociateRole(UUID userExternalId, UUID roleExternalId, UUID projectExternalId) {
-        var userFound = userService.getOneUser(userExternalId, projectExternalId);
-        var roleFound = roleService.getOneRole(roleExternalId, projectExternalId);
+        UserEntity userFound = userService.getOneUser(userExternalId, projectExternalId);
+        RoleEntity roleFound = roleService.getOneRole(roleExternalId, projectExternalId);
 
         if (hasRoleAssignedToUser(roleFound, userFound.getRoles())) {
             userFound.getRoles().removeIf(role -> role.getRoleExternalId().equals(roleFound.getRoleExternalId()));

@@ -1,10 +1,12 @@
 package br.com.gabrielferreira.users.domain.services.impl;
 
+import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
 import br.com.gabrielferreira.users.domain.entities.RoleEntity;
 import br.com.gabrielferreira.users.domain.exceptions.BusinessRuleException;
 import br.com.gabrielferreira.users.domain.exceptions.RoleNotFoundException;
 import br.com.gabrielferreira.users.domain.repositories.RoleRepository;
 import br.com.gabrielferreira.users.domain.repositories.filter.RoleFilter;
+import br.com.gabrielferreira.users.domain.repositories.projection.SummaryRoleProjection;
 import br.com.gabrielferreira.users.domain.services.ProjectService;
 import br.com.gabrielferreira.users.domain.services.RoleService;
 import br.com.gabrielferreira.users.domain.specs.RoleSpec;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -29,10 +32,10 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public RoleEntity save(RoleEntity roleEntity, UUID projectExternalId) {
-        var project = projectService.getOneProject(projectExternalId);
+        ProjectEntity project = projectService.getOneProject(projectExternalId);
         roleEntity.setProject(project);
 
-        var existingRoleWithAuthority = roleRepository.findOneByAuthorityAndProject_ProjectExternalId(roleEntity.getAuthority(), projectExternalId);
+        Optional<SummaryRoleProjection> existingRoleWithAuthority = roleRepository.findOneByAuthorityAndProject_ProjectExternalId(roleEntity.getAuthority(), projectExternalId);
         if (existingRoleWithAuthority.isPresent()) {
             String message = String.format("A role with the authority '%s' already exists in the project '%s'.",
                     roleEntity.getAuthority(), project.getName());
@@ -51,10 +54,10 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public RoleEntity update(UUID roleExternalId, RoleEntity roleEntity, UUID projectExternalId) {
-        var project = projectService.getOneProject(projectExternalId);
-        var role = getOneRole(roleExternalId, projectExternalId);
+        ProjectEntity project = projectService.getOneProject(projectExternalId);
+        RoleEntity role = getOneRole(roleExternalId, projectExternalId);
 
-        var existingRoleWithAuthority = roleRepository.findOneByAuthorityAndProject_ProjectExternalId(roleEntity.getAuthority(), projectExternalId);
+        Optional<SummaryRoleProjection> existingRoleWithAuthority = roleRepository.findOneByAuthorityAndProject_ProjectExternalId(roleEntity.getAuthority(), projectExternalId);
         if (existingRoleWithAuthority.isPresent() && !Objects.equals(existingRoleWithAuthority.get().getRoleExternalId(), role.getRoleExternalId())) {
             String message = String.format("A role with the authority '%s' already exists in the project '%s'.",
                     roleEntity.getAuthority(), project.getName());
@@ -74,8 +77,8 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     @Override
     public void delete(UUID roleExternalId, UUID projectExternalId) {
-        var project = projectService.getOneProject(projectExternalId);
-        var roleFound = getOneRole(roleExternalId, project.getProjectExternalId());
+        ProjectEntity project = projectService.getOneProject(projectExternalId);
+        RoleEntity roleFound = getOneRole(roleExternalId, project.getProjectExternalId());
 
         try {
             roleRepository.delete(roleFound);
