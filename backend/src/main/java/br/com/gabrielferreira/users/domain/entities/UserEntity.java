@@ -62,11 +62,8 @@ public class UserEntity implements Serializable {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private DocumentEntity document;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "TB_COMPANY_USER",
-            joinColumns = @JoinColumn(name = "USER_ID", referencedColumnName = "ID", table = "TB_USER"),
-            inverseJoinColumns = @JoinColumn(name = "COMPANY_ID", referencedColumnName = "ID", table = "TB_COMPANY"))
-    private List<CompanyEntity> companies = new ArrayList<>();
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<CompanyUserEntity> companyUsers = new ArrayList<>();
 
     @CreationTimestamp
     @Column(name = "CREATED_AT", nullable = false, updatable = false, columnDefinition = "datetime")

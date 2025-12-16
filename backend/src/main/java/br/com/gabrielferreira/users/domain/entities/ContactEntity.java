@@ -10,7 +10,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ToString(exclude = {"company"})
+@ToString
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "TB_CONTACT")
@@ -27,18 +27,21 @@ public class ContactEntity implements Serializable {
     @Column(name = "NAME", nullable = false)
     private String name;
 
-    @Column(name = "DDI")
-    private String ddi;
+    @Column(name = "DDI_PHONE")
+    private String ddiPhone;
 
-    @Column(name = "DDD")
-    private String ddd;
+    @Column(name = "DDD_PHONE")
+    private String dddPhone;
 
     @Column(name = "PHONE_NUMBER", nullable = false)
     private String phoneNumber;
 
+    @Column(name = "DDI_MOBILE")
+    private String ddiMobile;
+
+    @Column(name = "DDD_MOBILE")
+    private String dddMobile;
+
     @Column(name = "MOBILE_NUMBER", nullable = false)
     private String mobileNumber;
-
-    @OneToOne(mappedBy = "contact")
-    private CompanyEntity company;
 }

@@ -10,7 +10,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ToString(exclude = {"company"})
+@ToString
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
 @Table(name = "TB_ADDRESS")
@@ -44,7 +44,4 @@ public class AddressEntity implements Serializable {
 
     @Column(name = "STATE", nullable = false)
     private String state;
-
-    @OneToOne(mappedBy = "address")
-    private CompanyEntity company;
 }

@@ -67,11 +67,8 @@ public class CompanyEntity implements Serializable {
     @Column(name = "COMPANY_EXTERNAL_ID", nullable = false, unique = true)
     private UUID companyExternalId;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "TB_COMPANY_USER",
-            joinColumns = @JoinColumn(name = "COMPANY_ID", referencedColumnName = "ID", table = "TB_COMPANY"),
-            inverseJoinColumns = @JoinColumn(name = "USER_ID", referencedColumnName = "ID", table = "TB_USER"))
-    private List<UserEntity> users = new ArrayList<>();
+    @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
+    private List<CompanyUserEntity> companyUsers = new ArrayList<>();
 
     @CreationTimestamp
     @Column(name = "CREATED_AT", nullable = false, updatable = false, columnDefinition = "datetime")
