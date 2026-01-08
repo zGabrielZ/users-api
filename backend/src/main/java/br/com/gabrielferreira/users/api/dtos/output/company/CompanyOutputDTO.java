@@ -62,7 +62,14 @@ public record CompanyOutputDTO(
         OffsetDateTime createdAt,
 
         @Schema(
-               description = "Company document"
+               description = "Company document",
+                example = """
+                        {
+                          "documentExternalId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                          "type": "CNPJ",
+                          "number": "12.345.678/0001-90"
+                        }
+                        """
         )
         DocumentOutputDTO document
 ) implements Serializable {
