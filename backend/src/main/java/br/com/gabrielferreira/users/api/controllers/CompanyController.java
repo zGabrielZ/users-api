@@ -55,4 +55,32 @@ public class CompanyController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(companyOutputDTO);
     }
+
+    @Operation(summary = "Retrieve a company by external ID")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Company retrieved successfully"
+            )
+    })
+    @GetMapping("/{companyExternalId}")
+    public ResponseEntity<CompanyOutputDTO> retrieveByExternalId(
+            @Parameter(
+                    description = "Project external identifier",
+                    example = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    required = true
+            )
+            @RequestHeader ("projectExternalId") UUID projectExternalId,
+            @Parameter(
+                    description = "External ID of the company",
+                    example = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    required = true
+            )
+            @PathVariable UUID companyExternalId
+    ) {
+        CompanyEntity companyEntity = companyService.getOneCompany(companyExternalId, projectExternalId);
+
+        CompanyOutputDTO companyOutputDTO = companyOutputMapper.toOutputDto(companyEntity);
+        return ResponseEntity.ok(companyOutputDTO);
+    }
 }

@@ -6,6 +6,7 @@ import br.com.gabrielferreira.users.domain.entities.DocumentEntity;
 import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
 import br.com.gabrielferreira.users.domain.enums.DocumentType;
 import br.com.gabrielferreira.users.domain.exceptions.BusinessRuleException;
+import br.com.gabrielferreira.users.domain.exceptions.CompanyNotFoundException;
 import br.com.gabrielferreira.users.domain.repositories.CompanyRepository;
 import br.com.gabrielferreira.users.domain.repositories.projection.company.SummaryCompanyDocumentProjection;
 import br.com.gabrielferreira.users.domain.repositories.projection.company.SummaryCompanyEmailProjection;
@@ -45,6 +46,12 @@ public class CompanyServiceImpl implements CompanyService {
                 externalProjectId
         );
         return companyRepository.save(companyEntity);
+    }
+
+    @Override
+    public CompanyEntity getOneCompany(UUID companyExternalId, UUID projectExternalId) {
+        return companyRepository.findOneCompanyExternalIdAndProjectExternalId(companyExternalId, projectExternalId)
+                .orElseThrow(() -> new CompanyNotFoundException(companyExternalId, projectExternalId));
     }
 
     private void validateExistingCompanyWithDocumentAndProject(DocumentType type, String number, UUID externalProjectId) {

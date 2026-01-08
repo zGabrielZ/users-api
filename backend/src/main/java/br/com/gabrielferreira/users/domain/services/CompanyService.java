@@ -7,4 +7,6 @@ import java.util.UUID;
 public interface CompanyService {
 
     CompanyEntity save(CompanyEntity companyEntity, UUID externalProjectId);
+
+    CompanyEntity getOneCompany(UUID companyExternalId, UUID projectExternalId);
 }

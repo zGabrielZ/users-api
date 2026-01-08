@@ -33,5 +33,16 @@ public interface CompanyRepository extends JpaRepository<CompanyEntity, Long> {
     )
     Optional<SummaryCompanyDocumentProjection> findByDocumentAndProjectExternalId(@Param("type") DocumentType type, @Param("number") String number,
                                                                                                                                                       @Param("projectExternalId") UUID projectExternalId);
+
+    @Query(
+            "SELECT c FROM CompanyEntity c " +
+                    "JOIN FETCH c.document d " +
+                    "JOIN FETCH c.project p " +
+                    "JOIN FETCH c.address a " +
+                    "JOIN FETCH c.contact ct " +
+                    "WHERE c.companyExternalId = :companyExternalId " +
+                    "AND c.project.projectExternalId = :projectExternalId"
+    )
+    Optional<CompanyEntity> findOneCompanyExternalIdAndProjectExternalId(@Param("companyExternalId") UUID companyExternalId, @Param("projectExternalId") UUID projectExternalId);
 }
 
