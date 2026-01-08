@@ -12,7 +12,7 @@ import java.io.Serializable;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
-@ValidDocument(number = "number", type = "type")
+@ValidDocument(number = "number", type = "type", property = "")
 public record DocumentInputDTO(
         // TODO: colocar outro document type que no momento aceita o CNPJ e CPF
         // TODO: criar outros endpoints que aceita CNPJ para empresas

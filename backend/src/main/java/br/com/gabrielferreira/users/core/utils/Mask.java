@@ -58,8 +58,10 @@ public class Mask {
             }
             case CNPJ -> {
                 documentNumber = documentWithoutMask(type, documentNumber);
-                // TODO: precisaria ver uma solucao pra aceitar cnpj alfanumerico
-                yield documentNumber;
+                yield documentNumber.replaceFirst(
+                        "([A-Za-z0-9]{2})([A-Za-z0-9]{3})([A-Za-z0-9]{3})([A-Za-z0-9]{4})([A-Za-z0-9]{2})",
+                        "$1.$2.$3/$4-$5"
+                );
             }
             default -> documentNumber;
         };

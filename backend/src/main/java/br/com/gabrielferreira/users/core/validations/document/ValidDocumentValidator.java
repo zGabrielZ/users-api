@@ -15,6 +15,7 @@ public class ValidDocumentValidator implements ConstraintValidator<ValidDocument
 
     private String type;
     private String number;
+    private String property;
     private CPFValidator cpfValidator;
     private CNPJValidator cnpjValidator;
 
@@ -22,6 +23,7 @@ public class ValidDocumentValidator implements ConstraintValidator<ValidDocument
     public void initialize(ValidDocument constraintAnnotation) {
         type = constraintAnnotation.type();
         number = constraintAnnotation.number();
+        property = constraintAnnotation.property();
         cpfValidator = new CPFValidator();
         cpfValidator.initialize(new CPFNumeric());
         cnpjValidator = new CNPJValidator();
@@ -52,18 +54,23 @@ public class ValidDocumentValidator implements ConstraintValidator<ValidDocument
 
         if (!cnpjValidator.isValid(documentNumber, constraintValidatorContext)) {
             constraintValidatorContext.disableDefaultConstraintViolation();
-            constraintValidatorContext
-                    .buildConstraintViolationWithTemplate("Invalid CNPJ number.")
-                    .addPropertyNode("number")
+            ConstraintValidatorContext.ConstraintViolationBuilder builder =
+                    constraintValidatorContext.buildConstraintViolationWithTemplate(
+                            "Invalid CNPJ number."
+                    );
+
+            addPropertyNode(builder)
                     .addConstraintViolation();
             return false;
         }
 
         if (isOnlyNumeric && Mask.isSequential(documentNumber)) {
             constraintValidatorContext.disableDefaultConstraintViolation();
-            constraintValidatorContext
-                    .buildConstraintViolationWithTemplate("CNPJ number cannot be sequential digits.")
-                    .addPropertyNode("number")
+            ConstraintValidatorContext.ConstraintViolationBuilder builder =
+                    constraintValidatorContext.buildConstraintViolationWithTemplate(
+                            "CNPJ number cannot be sequential digits."
+                    );
+            addPropertyNode(builder)
                     .addConstraintViolation();
             return false;
         }
@@ -74,18 +81,22 @@ public class ValidDocumentValidator implements ConstraintValidator<ValidDocument
     private boolean isCpfValid(String documentNumber, ConstraintValidatorContext constraintValidatorContext) {
         if (!cpfValidator.isValid(documentNumber, constraintValidatorContext)) {
             constraintValidatorContext.disableDefaultConstraintViolation();
-            constraintValidatorContext
-                    .buildConstraintViolationWithTemplate("Invalid CPF number.")
-                    .addPropertyNode("number")
+            ConstraintValidatorContext .ConstraintViolationBuilder builder =
+                    constraintValidatorContext.buildConstraintViolationWithTemplate(
+                            "Invalid CPF number."
+                    );
+            addPropertyNode(builder)
                     .addConstraintViolation();
             return false;
         }
 
         if (Mask.isSequential(documentNumber)) {
             constraintValidatorContext.disableDefaultConstraintViolation();
-            constraintValidatorContext
-                    .buildConstraintViolationWithTemplate("CPF number cannot be sequential digits.")
-                    .addPropertyNode("number")
+            ConstraintValidatorContext.ConstraintViolationBuilder builder =
+                    constraintValidatorContext.buildConstraintViolationWithTemplate(
+                            "CPF number cannot be sequential digits."
+                    );
+            addPropertyNode(builder)
                     .addConstraintViolation();
             return false;
         }
@@ -125,5 +136,12 @@ public class ValidDocumentValidator implements ConstraintValidator<ValidDocument
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext addPropertyNode(ConstraintValidatorContext.ConstraintViolationBuilder builder) {
+        if (StringUtils.isNotBlank(this.property)) {
+            return builder.addPropertyNode(this.property);
+        }
+        return builder.addPropertyNode("number");
     }
 }

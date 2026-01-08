@@ -22,9 +22,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "TB_COMPANY", uniqueConstraints = {
         @UniqueConstraint(name = "UK_COMPANY_EMAIL_PROJECT", columnNames = {"EMAIL", "PROJECT_ID"}),
-        @UniqueConstraint(name = "UK_COMPANY_DOCUMENT_PROJECT", columnNames = {"DOCUMENT_ID", "PROJECT_ID"}),
-        @UniqueConstraint(name = "UK_COMPANY_ADDRESS_PROJECT", columnNames = {"ADDRESS_ID", "PROJECT_ID"}),
-        @UniqueConstraint(name = "UK_COMPANY_CONTACT_PROJECT", columnNames = {"CONTACT_ID", "PROJECT_ID"})
+        @UniqueConstraint(name = "UK_COMPANY_DOCUMENT_PROJECT", columnNames = {"DOCUMENT_ID", "PROJECT_ID"})
 })
 public class CompanyEntity implements Serializable {
 
@@ -56,7 +54,7 @@ public class CompanyEntity implements Serializable {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private AddressEntity address;
 
-    @JoinColumn(name = "CONTACT_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_CONTACT_ADDRESS_ID"))
+    @JoinColumn(name = "CONTACT_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_COMPANY_CONTACT_ID"))
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private ContactEntity contact;
 

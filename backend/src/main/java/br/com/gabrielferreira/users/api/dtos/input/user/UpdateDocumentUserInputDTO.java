@@ -12,7 +12,7 @@ import java.io.Serializable;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
-@ValidDocument(number = "number", type = "type")
+@ValidDocument(number = "number", type = "type", property = "number")
 public record UpdateDocumentUserInputDTO(
         @Schema(
                 description = "CPF document number",

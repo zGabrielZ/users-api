@@ -21,4 +21,6 @@ public @interface ValidDocument {
     String type();
 
     String number();
+
+    String property();
 }

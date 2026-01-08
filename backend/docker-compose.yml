@@ -16,7 +16,6 @@ services:
       - "9191:9090"
     networks:
       - compose-bridge
-    restart: always
 
 networks:
   compose-bridge:
