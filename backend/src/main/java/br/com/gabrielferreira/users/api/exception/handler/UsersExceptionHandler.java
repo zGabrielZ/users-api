@@ -60,56 +60,6 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(PatchOperationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<Object> handlePatchOperationException(PatchOperationException ex, WebRequest request) {
-        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-        ProblemDetailType problemDetailType = ProblemDetailType.PATCH_OPERATION_ERROR;
-        ProblemDetailDTO problemDetailDto = createProblemDetailDto(
-                httpStatus,
-                problemDetailType,
-                ex.getMessage(),
-                null
-        );
-        return handleExceptionInternal(ex, problemDetailDto, new HttpHeaders(), httpStatus, request);
-    }
-
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ApiResponse(
-            responseCode = "500",
-            description = "Internal Server Error",
-            content = @Content(
-                    mediaType = "application/json",
-                    examples = {
-                            @ExampleObject(
-                                    name = "System Error",
-                                    value = """
-                                            {
-                                              "status": 500,
-                                              "type": "https://api.example.com/problems/system-error",
-                                              "title": "System Error",
-                                              "detail": "An unexpected internal system error has occurred. Please try again and if the problem persists, contact the system administrator.",
-                                              "message": "An unexpected internal system error has occurred. Please try again and if the problem persists, contact the system administrator.",
-                                              "timestamp": "2024-06-01T12:00:00Z"
-                                            }
-                                            """
-                            )
-                    }
-            )
-    )
-    public ResponseEntity<Object> handleUncaught(Exception ex, WebRequest request) {
-        HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-        ProblemDetailType problemDetailType = ProblemDetailType.SYSTEM_ERROR;
-        ProblemDetailDTO problemDetailDto = createProblemDetailDto(
-                httpStatus,
-                problemDetailType,
-                GENERIC_USER_MESSAGE,
-                null
-        );
-        return handleExceptionInternal(ex, problemDetailDto, new HttpHeaders(), httpStatus, request);
-    }
-
-    @ExceptionHandler(BusinessRuleException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ApiResponse(
             responseCode = "400",
             description = "Bad Request",
@@ -168,6 +118,56 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
                     }
             )
     )
+    public ResponseEntity<Object> handlePatchOperationException(PatchOperationException ex, WebRequest request) {
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        ProblemDetailType problemDetailType = ProblemDetailType.PATCH_OPERATION_ERROR;
+        ProblemDetailDTO problemDetailDto = createProblemDetailDto(
+                httpStatus,
+                problemDetailType,
+                ex.getMessage(),
+                null
+        );
+        return handleExceptionInternal(ex, problemDetailDto, new HttpHeaders(), httpStatus, request);
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ApiResponse(
+            responseCode = "500",
+            description = "Internal Server Error",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = {
+                            @ExampleObject(
+                                    name = "System Error",
+                                    value = """
+                                            {
+                                              "status": 500,
+                                              "type": "https://api.example.com/problems/system-error",
+                                              "title": "System Error",
+                                              "detail": "An unexpected internal system error has occurred. Please try again and if the problem persists, contact the system administrator.",
+                                              "message": "An unexpected internal system error has occurred. Please try again and if the problem persists, contact the system administrator.",
+                                              "timestamp": "2024-06-01T12:00:00Z"
+                                            }
+                                            """
+                            )
+                    }
+            )
+    )
+    public ResponseEntity<Object> handleUncaught(Exception ex, WebRequest request) {
+        HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        ProblemDetailType problemDetailType = ProblemDetailType.SYSTEM_ERROR;
+        ProblemDetailDTO problemDetailDto = createProblemDetailDto(
+                httpStatus,
+                problemDetailType,
+                GENERIC_USER_MESSAGE,
+                null
+        );
+        return handleExceptionInternal(ex, problemDetailDto, new HttpHeaders(), httpStatus, request);
+    }
+
+    @ExceptionHandler(BusinessRuleException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Object> handleBusinessRuleException(BusinessRuleException ex, WebRequest request) {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         ProblemDetailType problemDetailType = ProblemDetailType.BUSINESS_RULE_VIOLATION;
