@@ -1,6 +1,7 @@
 package br.com.gabrielferreira.users.api.controllers;
 
 import br.com.gabrielferreira.users.api.dtos.input.company.CreateCompanyInputDTO;
+import br.com.gabrielferreira.users.api.dtos.input.company.UpdateCompanyInputDTO;
 import br.com.gabrielferreira.users.api.dtos.output.company.CompanyOutputDTO;
 import br.com.gabrielferreira.users.api.mappers.company.input.CompanyInputMapper;
 import br.com.gabrielferreira.users.api.mappers.company.output.CompanyOutputMapper;
@@ -79,6 +80,36 @@ public class CompanyController {
             @PathVariable UUID companyExternalId
     ) {
         CompanyEntity companyEntity = companyService.getOneCompany(companyExternalId, projectExternalId);
+
+        CompanyOutputDTO companyOutputDTO = companyOutputMapper.toOutputDto(companyEntity);
+        return ResponseEntity.ok(companyOutputDTO);
+    }
+
+    @Operation(summary = "Update an existing company")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Company updated successfully"
+            )
+    })
+    @PatchMapping("/{companyExternalId}")
+    public ResponseEntity<CompanyOutputDTO> update(
+            @Parameter(
+                    description = "Project external identifier",
+                    example = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    required = true
+            )
+            @RequestHeader ("projectExternalId") UUID projectExternalId,
+            @Parameter(
+                    description = "External ID of the company",
+                    example = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                    required = true
+            )
+            @PathVariable UUID companyExternalId,
+            @Valid @RequestBody UpdateCompanyInputDTO payload
+    ) {
+        CompanyEntity companyEntity = companyInputMapper.toEntity(payload);
+        companyEntity = companyService.update(companyEntity, companyExternalId, projectExternalId);
 
         CompanyOutputDTO companyOutputDTO = companyOutputMapper.toOutputDto(companyEntity);
         return ResponseEntity.ok(companyOutputDTO);

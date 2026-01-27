@@ -7,6 +7,7 @@ import br.com.gabrielferreira.users.api.exception.mappers.ProblemDetailMapper;
 import br.com.gabrielferreira.users.domain.exceptions.BusinessRuleException;
 import br.com.gabrielferreira.users.domain.exceptions.EntityInUseException;
 import br.com.gabrielferreira.users.domain.exceptions.EntityNotFoundException;
+import br.com.gabrielferreira.users.domain.exceptions.PatchOperationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.PropertyBindingException;
@@ -56,6 +57,20 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
     private String apiBaseUri;
 
     private final ProblemDetailMapper problemDetailMapper;
+
+    @ExceptionHandler(PatchOperationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> handlePatchOperationException(PatchOperationException ex, WebRequest request) {
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        ProblemDetailType problemDetailType = ProblemDetailType.PATCH_OPERATION_ERROR;
+        ProblemDetailDTO problemDetailDto = createProblemDetailDto(
+                httpStatus,
+                problemDetailType,
+                ex.getMessage(),
+                null
+        );
+        return handleExceptionInternal(ex, problemDetailDto, new HttpHeaders(), httpStatus, request);
+    }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -134,6 +149,19 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
                                                   "message": "The password must be at least 8 characters long."
                                                 }
                                               ]
+                                            }
+                                            """
+                            ),
+                            @ExampleObject(
+                                    name = "Patch Operation Error",
+                                    value = """
+                                            {
+                                              "status": 400,
+                                              "type": "https://api.example.com/problems/patch-operation-error",
+                                              "title": "Patch Operation Error",
+                                              "detail": "Failed to update object fields",
+                                              "message": "Failed to update object fields",
+                                              "timestamp": "2024-06-01T12:00:00Z"
                                             }
                                             """
                             )

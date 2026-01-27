@@ -9,4 +9,6 @@ public interface CompanyService {
     CompanyEntity save(CompanyEntity companyEntity, UUID externalProjectId);
 
     CompanyEntity getOneCompany(UUID companyExternalId, UUID projectExternalId);
+
+    CompanyEntity update(CompanyEntity companyEntity, UUID companyExternalId, UUID projectExternalId);
 }
