@@ -6,7 +6,6 @@ import br.com.gabrielferreira.users.domain.exceptions.EntityInUseException;
 import br.com.gabrielferreira.users.domain.exceptions.ProjectNotFoundException;
 import br.com.gabrielferreira.users.domain.repositories.ProjectRepository;
 import br.com.gabrielferreira.users.domain.repositories.filter.ProjectFilter;
-import br.com.gabrielferreira.users.domain.repositories.projection.SummaryProjectProjection;
 import br.com.gabrielferreira.users.domain.services.ProjectService;
 import br.com.gabrielferreira.users.domain.specs.ProjectSpec;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -29,10 +27,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     @Override
     public ProjectEntity save(ProjectEntity projectEntity) {
-        Optional<SummaryProjectProjection> existingProjectWithName = projectRepository.findOneByName(projectEntity.getName());
-        if (existingProjectWithName.isPresent()) {
-            throw new BusinessRuleException("A project with the name '%s' already exists.".formatted(projectEntity.getName()));
-        }
+        validateExistingProjectName(projectEntity.getName(), null);
         return projectRepository.save(projectEntity);
     }
 
@@ -46,10 +41,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectEntity update(UUID projectExternalId, ProjectEntity projectEntity) {
         ProjectEntity projectFound = getOneProject(projectExternalId);
-        Optional<SummaryProjectProjection> existingProjectWithName = projectRepository.findOneByName(projectEntity.getName());
-        if (existingProjectWithName.isPresent() && !Objects.equals(projectFound.getProjectExternalId(), existingProjectWithName.get().getProjectExternalId())) {
-            throw new BusinessRuleException("A project with the name '%s' already exists.".formatted(projectEntity.getName()));
-        }
+        validateExistingProjectName(projectEntity.getName(), projectExternalId);
 
         projectFound.setName(projectEntity.getName());
         return projectRepository.save(projectFound);
@@ -68,7 +60,21 @@ public class ProjectServiceImpl implements ProjectService {
             projectRepository.delete(projectFound);
             projectRepository.flush();
         } catch (DataIntegrityViolationException e) {
-            throw new EntityInUseException("Project with ID %s cannot be removed as it is in use.".formatted(projectExternalId));
+            throw new EntityInUseException(String.format("Project with ID %s cannot be removed as it is in use.", projectExternalId));
         }
+    }
+
+    private void validateExistingProjectName(String name, UUID projectExternalId) {
+        String templateErrorMessage = "A project with the name '%s' already exists.";
+        projectRepository.findOneByName(name)
+                .ifPresent(project -> {
+                    if (Objects.isNull(projectExternalId)) {
+                        throw new BusinessRuleException(templateErrorMessage.formatted(name));
+                    }
+
+                    if (!Objects.equals(projectExternalId, project.getProjectExternalId())) {
+                        throw new BusinessRuleException(templateErrorMessage.formatted(name));
+                    }
+                });
     }
 }

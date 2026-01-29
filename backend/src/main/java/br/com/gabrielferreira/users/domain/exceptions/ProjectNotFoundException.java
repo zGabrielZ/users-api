@@ -13,6 +13,6 @@ public class ProjectNotFoundException extends EntityNotFoundException {
     }
 
     public ProjectNotFoundException(UUID projectId) {
-        this("Project with ID %s not found".formatted(projectId));
+        this(String.format("Project with ID %s not found.", projectId));
     }
 }

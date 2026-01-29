@@ -1,7 +1,7 @@
 package br.com.gabrielferreira.users.domain.repositories;
 
 import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
-import br.com.gabrielferreira.users.domain.repositories.projection.SummaryProjectProjection;
+import br.com.gabrielferreira.users.domain.repositories.projection.project.SummaryProjectProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
