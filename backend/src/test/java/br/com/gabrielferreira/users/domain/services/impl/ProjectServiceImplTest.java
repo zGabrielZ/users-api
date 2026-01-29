@@ -7,7 +7,7 @@ import br.com.gabrielferreira.users.domain.exceptions.ProjectNotFoundException;
 import br.com.gabrielferreira.users.domain.repositories.ProjectRepository;
 import br.com.gabrielferreira.users.domain.repositories.filter.ProjectFilter;
 import br.com.gabrielferreira.users.domain.repositories.projection.project.SummaryProjectProjection;
-import br.com.gabrielferreira.users.stub.ProjectEntityStub;
+import br.com.gabrielferreira.users.stub.project.ProjectEntityStub;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;

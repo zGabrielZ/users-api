@@ -1,4 +1,4 @@
-package br.com.gabrielferreira.users.stub;
+package br.com.gabrielferreira.users.stub.project;
 
 import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
 import org.springframework.data.domain.Page;
