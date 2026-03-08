@@ -6,8 +6,6 @@ import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
 import br.com.gabrielferreira.users.domain.entities.UserEntity;
 import br.com.gabrielferreira.users.domain.repositories.ProjectRepository;
 import br.com.gabrielferreira.users.domain.repositories.UserRepository;
-import br.com.gabrielferreira.users.stub.project.ProjectDTOStub;
-import br.com.gabrielferreira.users.stub.project.ProjectEntityStub;
 import br.com.gabrielferreira.users.stub.user.UserEntityStub;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
@@ -62,7 +60,9 @@ class ProjectControllerIntegrationTest {
     @Order(1)
     @SneakyThrows
     void givenPayloadProjectWhenCreateThenReturnCreatedProject() {
-        CreateProjectInputDTO createProjectInputDTO = ProjectDTOStub.createCreateProjectInputDTO("New Project");
+        var createProjectInputDTO = CreateProjectInputDTO.builder()
+                .name("New Project")
+                .build();
         String payload = objectMapper.writeValueAsString(createProjectInputDTO);
 
         mockMvc.perform(post(URL)
@@ -80,7 +80,9 @@ class ProjectControllerIntegrationTest {
     @Order(2)
     @SneakyThrows
     void givenPayloadProjectWhenCreateThenNotSaveDueToExistingName() {
-        CreateProjectInputDTO createProjectInputDTO = ProjectDTOStub.createCreateProjectInputDTO("Project A");
+        var createProjectInputDTO = CreateProjectInputDTO.builder()
+                .name("Project A")
+                .build();
         String payload = objectMapper.writeValueAsString(createProjectInputDTO);
 
         mockMvc.perform(post(URL)
@@ -176,7 +178,9 @@ class ProjectControllerIntegrationTest {
     @Order(7)
     @SneakyThrows
     void givenPayloadProjectWithProjectExternalIdExistingWhenUpdateThenReturnProjectUpdate() {
-        UpdateProjectInputDTO updateProjectInputDTO = ProjectDTOStub.updateProjectInputDTO("Project A Updated");
+        var updateProjectInputDTO = UpdateProjectInputDTO.builder()
+                .name("Project A Updated")
+                .build();
         String payload = objectMapper.writeValueAsString(updateProjectInputDTO);
 
         mockMvc.perform(put(URL.concat("/{projectExternalId}"), projectIdExisting)
@@ -194,7 +198,9 @@ class ProjectControllerIntegrationTest {
     @Order(8)
     @SneakyThrows
     void givenPayloadProjectWithProjectExternalIdNonExistingWhenUpdateThenReturnNotFound() {
-        UpdateProjectInputDTO updateProjectInputDTO = ProjectDTOStub.updateProjectInputDTO("Project A Updated");
+        var updateProjectInputDTO = UpdateProjectInputDTO.builder()
+                .name("Project A Updated")
+                .build();
         String payload = objectMapper.writeValueAsString(updateProjectInputDTO);
 
         mockMvc.perform(put(URL.concat("/{projectExternalId}"), projectIdNonExisting)
@@ -215,10 +221,14 @@ class ProjectControllerIntegrationTest {
     @SneakyThrows
     void givenPayloadProjectWithProjectExternalIdExistingWhenUpdateThenReturnNotSaveDueToExistingName() {
         // Create another project with name "Project B" to test the update with existing name
-        ProjectEntity projectEntity = ProjectEntityStub.createProjectEntity("Project B");
+        ProjectEntity projectEntity = ProjectEntity.builder()
+                .name("Project B")
+                .build();
         projectEntity = projectRepository.saveAndFlush(projectEntity);
 
-        UpdateProjectInputDTO updateProjectInputDTO = ProjectDTOStub.updateProjectInputDTO("Project A");
+        UpdateProjectInputDTO updateProjectInputDTO = UpdateProjectInputDTO.builder()
+                .name("Project A")
+                .build();
         String payload = objectMapper.writeValueAsString(updateProjectInputDTO);
 
         mockMvc.perform(put(URL.concat("/{projectExternalId}"), projectEntity.getProjectExternalId())
@@ -313,7 +323,9 @@ class ProjectControllerIntegrationTest {
     @SneakyThrows
     void givenProjectExternalIdExistingWhenDeleteThenThrowDueToProjectInUse() {
         // Create another project and user to associate with the existing project to make it in use
-        ProjectEntity projectEntity = ProjectEntityStub.createProjectEntity("Project C");
+        ProjectEntity projectEntity = ProjectEntity.builder()
+                .name("Project C")
+                .build();
         projectEntity = projectRepository.saveAndFlush(projectEntity);
 
         // Associate the user with the existing project to make it in use

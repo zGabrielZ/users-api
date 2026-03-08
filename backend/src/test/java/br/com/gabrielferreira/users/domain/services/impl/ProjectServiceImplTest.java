@@ -51,11 +51,13 @@ class ProjectServiceImplTest {
     @Test
     @Order(1)
     void givenProjectEntityWhenSaveThenReturnProjectEntityCreated() {
-        ProjectEntity projectEntity = ProjectEntityStub.createProjectEntity("Project A");
+        ProjectEntity projectEntity = ProjectEntity.builder()
+                .name("Project A")
+                .build();
         when(projectRepository.findOneByName(projectEntity.getName()))
                 .thenReturn(Optional.empty());
 
-        ProjectEntity projectCreated = ProjectEntityStub.createProjectEntityWithMoreInfo(projectEntity.getName(), projectExternalId);
+        ProjectEntity projectCreated = ProjectEntityStub.createProjectEntity(projectEntity.getName(), projectExternalId);
         when(projectRepository.save(projectEntity))
                 .thenReturn(projectCreated);
 
@@ -70,7 +72,9 @@ class ProjectServiceImplTest {
     @Test
     @Order(2)
     void givenProjectEntityWhenSaveThenNotSaveDueToExistingName() {
-        ProjectEntity projectEntity = ProjectEntityStub.createProjectEntity("Project A");
+        ProjectEntity projectEntity = ProjectEntity.builder()
+                .name("Project A")
+                .build();
 
         SummaryProjectProjection existingProject = mock(SummaryProjectProjection.class);
         when(projectRepository.findOneByName(projectEntity.getName()))
@@ -86,7 +90,7 @@ class ProjectServiceImplTest {
     @Test
     @Order(3)
     void givenProjectExternalIdWhenGetOneProjectThenReturnProjectEntity() {
-        ProjectEntity projectEntityFound = ProjectEntityStub.createProjectEntityWithMoreInfo("Project B", projectExternalId);
+        ProjectEntity projectEntityFound = ProjectEntityStub.createProjectEntity("Project B", projectExternalId);
         when(projectRepository.findOneByProjectExternalId(projectExternalId))
                 .thenReturn(Optional.of(projectEntityFound));
 
@@ -112,16 +116,18 @@ class ProjectServiceImplTest {
     @Test
     @Order(5)
     void givenProjectEntityWithProjectExternalIdWhenUpdateProjectThenReturnProjectEntityUpdated() {
-        ProjectEntity projectEntity = ProjectEntityStub.createProjectEntity("Project A");
+        ProjectEntity projectEntity = ProjectEntity.builder()
+                .name("Project A")
+                .build();
 
-        ProjectEntity projectEntityFound = ProjectEntityStub.createProjectEntityWithMoreInfo("Project B", projectExternalId);
+        ProjectEntity projectEntityFound = ProjectEntityStub.createProjectEntity("Project B", projectExternalId);
         when(projectRepository.findOneByProjectExternalId(projectExternalId))
                 .thenReturn(Optional.of(projectEntityFound));
 
         when(projectRepository.findOneByName(projectEntity.getName()))
                 .thenReturn(Optional.empty());
 
-        ProjectEntity projectEntityUpdated = ProjectEntityStub.createProjectEntityWithMoreInfo(projectEntity.getName(), projectExternalId);
+        ProjectEntity projectEntityUpdated = ProjectEntityStub.createProjectEntity(projectEntity.getName(), projectExternalId);
         projectEntityFound.setName(projectEntity.getName());
         when(projectRepository.save(projectEntityFound))
                 .thenReturn(projectEntityUpdated);
@@ -137,9 +143,11 @@ class ProjectServiceImplTest {
     @Test
     @Order(6)
     void givenProjectEntityWithProjectExternalIdWhenUpdateProjectThenThrowDueToExistingName() {
-        ProjectEntity projectEntity = ProjectEntityStub.createProjectEntity("Project A");
+        ProjectEntity projectEntity = ProjectEntity.builder()
+                .name("Project A")
+                .build();
 
-        ProjectEntity projectEntityFound = ProjectEntityStub.createProjectEntityWithMoreInfo("Project B", projectExternalId);
+        ProjectEntity projectEntityFound = ProjectEntityStub.createProjectEntity("Project B", projectExternalId);
         when(projectRepository.findOneByProjectExternalId(projectExternalId))
                 .thenReturn(Optional.of(projectEntityFound));
 
@@ -158,7 +166,7 @@ class ProjectServiceImplTest {
     @Test
     @Order(7)
     void givenProjectExternalIdWhenDeleteProjectThenSuccess() {
-        ProjectEntity projectEntityFound = ProjectEntityStub.createProjectEntityWithMoreInfo("Project B", projectExternalId);
+        ProjectEntity projectEntityFound = ProjectEntityStub.createProjectEntity("Project B", projectExternalId);
         when(projectRepository.findOneByProjectExternalId(projectExternalId))
                 .thenReturn(Optional.of(projectEntityFound));
 
@@ -171,7 +179,7 @@ class ProjectServiceImplTest {
     @Test
     @Order(8)
     void givenProjectExternalIdWhenDeleteProjectThenThrowDueToUsedEntity() {
-        ProjectEntity projectEntityFound = ProjectEntityStub.createProjectEntityWithMoreInfo("Project B", projectExternalId);
+        ProjectEntity projectEntityFound = ProjectEntityStub.createProjectEntity("Project B", projectExternalId);
         when(projectRepository.findOneByProjectExternalId(projectExternalId))
                 .thenReturn(Optional.of(projectEntityFound));
 
