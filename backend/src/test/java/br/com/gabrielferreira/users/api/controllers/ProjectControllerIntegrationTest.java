@@ -1,5 +1,6 @@
 package br.com.gabrielferreira.users.api.controllers;
 
+import br.com.gabrielferreira.users.api.dtos.filter.project.ProjectFilterDTO;
 import br.com.gabrielferreira.users.api.dtos.input.project.CreateProjectInputDTO;
 import br.com.gabrielferreira.users.api.dtos.input.project.UpdateProjectInputDTO;
 import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
@@ -342,5 +343,39 @@ class ProjectControllerIntegrationTest {
                 .andExpect(jsonPath("$.detail").value(String.format("Project with ID %s cannot be removed as it is in use.", projectEntity.getProjectExternalId().toString())))
                 .andExpect(jsonPath("$.message").value("The entity is currently in use and cannot be modified or deleted."))
                 .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+    @Test
+    @Order(14)
+    @SneakyThrows
+    void givenProjectFilterDtoWhenListAllThenReturnProject() {
+        ProjectEntity projectEntity = ProjectEntity.builder()
+                .name("Project C")
+                .build();
+        projectEntity = projectRepository.saveAndFlush(projectEntity);
+
+        var projectFilterDTO = ProjectFilterDTO.builder()
+                .projectExternalId(projectEntity.getProjectExternalId())
+                .name(projectEntity.getName())
+                .createdAtTo(projectEntity.getCreatedAt())
+                .createdAtFrom(projectEntity.getCreatedAt())
+                .build();
+
+        String payload = objectMapper.writeValueAsString(projectFilterDTO);
+
+        String url = URL.concat("?sort=createdAt,DESC");
+        mockMvc.perform(get(url)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON)
+                        .content(payload)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].projectExternalId").value(projectEntity.getProjectExternalId().toString()))
+                .andExpect(jsonPath("$.content[0].name").value(projectEntity.getName()))
+                .andExpect(jsonPath("$.content[0].createdAt").value(projectEntity.getCreatedAt().toString()))
+                .andExpect(jsonPath("$.size").value(5))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.number").value(0));
     }
 }

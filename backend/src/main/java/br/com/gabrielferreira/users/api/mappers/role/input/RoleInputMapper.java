@@ -1,6 +1,6 @@
 package br.com.gabrielferreira.users.api.mappers.role.input;
 
-import br.com.gabrielferreira.users.api.dtos.filter.RoleFilterDTO;
+import br.com.gabrielferreira.users.api.dtos.filter.role.RoleFilterDTO;
 import br.com.gabrielferreira.users.api.dtos.input.role.CreateRoleInputDTO;
 import br.com.gabrielferreira.users.api.dtos.input.role.UpdateRoleInputDTO;
 import br.com.gabrielferreira.users.domain.entities.RoleEntity;

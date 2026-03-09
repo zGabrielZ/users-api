@@ -1,6 +1,6 @@
 package br.com.gabrielferreira.users.api.controllers;
 
-import br.com.gabrielferreira.users.api.dtos.filter.ProjectFilterDTO;
+import br.com.gabrielferreira.users.api.dtos.filter.project.ProjectFilterDTO;
 import br.com.gabrielferreira.users.api.dtos.input.project.CreateProjectInputDTO;
 import br.com.gabrielferreira.users.api.dtos.input.project.UpdateProjectInputDTO;
 import br.com.gabrielferreira.users.api.dtos.output.page.PageResponse;

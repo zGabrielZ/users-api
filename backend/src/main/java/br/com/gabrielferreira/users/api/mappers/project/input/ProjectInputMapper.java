@@ -1,17 +1,20 @@
 package br.com.gabrielferreira.users.api.mappers.project.input;
 
-import br.com.gabrielferreira.users.api.dtos.filter.ProjectFilterDTO;
+import br.com.gabrielferreira.users.api.dtos.filter.project.ProjectFilterDTO;
 import br.com.gabrielferreira.users.api.dtos.input.project.CreateProjectInputDTO;
 import br.com.gabrielferreira.users.api.dtos.input.project.UpdateProjectInputDTO;
-import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
 import br.com.gabrielferreira.users.core.utils.Constants;
+import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
 import br.com.gabrielferreira.users.domain.repositories.filter.ProjectFilter;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
 public interface ProjectInputMapper {
+
+    ProjectInputMapper INSTANCE = Mappers.getMapper(ProjectInputMapper.class);
 
     @Mapping(source = "name", target = "name", qualifiedByName = "trimIfNotBlank")
     ProjectEntity toProjectEntity(CreateProjectInputDTO createProjectInputDTO);
