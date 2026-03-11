@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.exc.PropertyBindingException;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Value;
@@ -167,7 +168,6 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(BusinessRuleException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Object> handleBusinessRuleException(BusinessRuleException ex, WebRequest request) {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         ProblemDetailType problemDetailType = ProblemDetailType.BUSINESS_RULE_VIOLATION;
@@ -253,7 +253,12 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex,
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode status,
+            @NonNull WebRequest request
+    ) {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         ProblemDetailType problemDetailType = ProblemDetailType.INVALID_DATA;
         ProblemDetailDTO problemDetailDto = createProblemDetailDto(
@@ -266,7 +271,12 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected ResponseEntity<Object> handleServletRequestBindingException(ServletRequestBindingException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+    protected ResponseEntity<Object> handleServletRequestBindingException(
+            @NonNull ServletRequestBindingException ex,
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode status,
+            @NonNull WebRequest request
+    ) {
         if (ex instanceof MissingRequestHeaderException missingRequestHeaderException) {
             HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
             ProblemDetailType problemDetailType = ProblemDetailType.INVALID_HEADER;
@@ -285,7 +295,12 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+    protected ResponseEntity<Object> handleTypeMismatch(
+            @NonNull TypeMismatchException ex,
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode status,
+            @NonNull WebRequest request
+    ) {
         if (ex instanceof MethodArgumentTypeMismatchException methodArgumentTypeMismatchException) {
             HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
             ProblemDetailType problemDetailType = ProblemDetailType.INVALID_PARAMETER;
@@ -306,7 +321,12 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected ResponseEntity<Object> handleNoResourceFoundException(NoResourceFoundException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+    protected ResponseEntity<Object> handleNoResourceFoundException(
+            NoResourceFoundException ex,
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode status,
+            @NonNull WebRequest request
+    ) {
         HttpStatus httpStatus = HttpStatus.NOT_FOUND;
         ProblemDetailType problemDetailType = ProblemDetailType.RESOURCE_NOT_FOUND;
         String detail = String.format("The resource '%s' who you tried to access is not found.", ex.getResourcePath());
@@ -320,7 +340,12 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex,
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode status,
+            @NonNull WebRequest request
+    ) {
         if (Objects.nonNull(ex.getCause()) && ex.getCause() instanceof InvalidFormatException invalidFormatException) {
             return handleInvalidFormatException(invalidFormatException, headers, status, request);
         }
@@ -372,7 +397,13 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
+    protected ResponseEntity<Object> handleExceptionInternal(
+            @NonNull Exception ex,
+            Object body,
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode statusCode,
+            @NonNull WebRequest request
+    ) {
         HttpStatus httpStatus = HttpStatus.valueOf(statusCode.value());
 
         if (Objects.isNull(body)) {
