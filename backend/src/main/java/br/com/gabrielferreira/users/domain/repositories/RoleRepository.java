@@ -20,7 +20,7 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long>, JpaSpec
                     "WHERE r.roleExternalId = :roleExternalId " +
                     "AND p.projectExternalId = :projectExternalId"
     )
-    Optional<RoleEntity> findOneByRoleExternalIdAndProject_ProjectExternalId(@Param("roleExternalId") UUID roleExternalId, @Param("projectExternalId") UUID projectExternalId);
+    Optional<RoleEntity> findOneByRoleExternalIdAndProjectExternalId(@Param("roleExternalId") UUID roleExternalId, @Param("projectExternalId") UUID projectExternalId);
 
     @Query(
             "SELECT r.roleExternalId as roleExternalId, r.authority as authority FROM RoleEntity r " +
@@ -28,5 +28,5 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long>, JpaSpec
                     "WHERE r.authority = :authority " +
                     "AND p.projectExternalId = :projectExternalId"
     )
-    Optional<SummaryRoleProjection> findOneByAuthorityAndProject_ProjectExternalId(@Param("authority") String authority, @Param("projectExternalId") UUID projectExternalId);
+    Optional<SummaryRoleProjection> findOneByAuthorityAndProjectExternalId(@Param("authority") String authority, @Param("projectExternalId") UUID projectExternalId);
 }

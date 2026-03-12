@@ -3,10 +3,10 @@ package br.com.gabrielferreira.users.domain.services.impl;
 import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
 import br.com.gabrielferreira.users.domain.entities.RoleEntity;
 import br.com.gabrielferreira.users.domain.exceptions.BusinessRuleException;
+import br.com.gabrielferreira.users.domain.exceptions.EntityInUseException;
 import br.com.gabrielferreira.users.domain.exceptions.RoleNotFoundException;
 import br.com.gabrielferreira.users.domain.repositories.RoleRepository;
 import br.com.gabrielferreira.users.domain.repositories.filter.RoleFilter;
-import br.com.gabrielferreira.users.domain.repositories.projection.SummaryRoleProjection;
 import br.com.gabrielferreira.users.domain.services.ProjectService;
 import br.com.gabrielferreira.users.domain.services.RoleService;
 import br.com.gabrielferreira.users.domain.specs.RoleSpec;
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -35,19 +34,13 @@ public class RoleServiceImpl implements RoleService {
         ProjectEntity project = projectService.getOneProject(projectExternalId);
         roleEntity.setProject(project);
 
-        Optional<SummaryRoleProjection> existingRoleWithAuthority = roleRepository.findOneByAuthorityAndProject_ProjectExternalId(roleEntity.getAuthority(), projectExternalId);
-        if (existingRoleWithAuthority.isPresent()) {
-            String message = String.format("A role with the authority '%s' already exists in the project '%s'.",
-                    roleEntity.getAuthority(), project.getName());
-            throw new BusinessRuleException(message);
-        }
-
+        validateExistingAuthorityRoleForProject(roleEntity.getAuthority(), project, null);
         return roleRepository.save(roleEntity);
     }
 
     @Override
     public RoleEntity getOneRole(UUID roleExternalId, UUID projectExternalId) {
-        return roleRepository.findOneByRoleExternalIdAndProject_ProjectExternalId(roleExternalId, projectExternalId)
+        return roleRepository.findOneByRoleExternalIdAndProjectExternalId(roleExternalId, projectExternalId)
                 .orElseThrow(() -> new RoleNotFoundException(roleExternalId, projectExternalId));
     }
 
@@ -56,13 +49,7 @@ public class RoleServiceImpl implements RoleService {
     public RoleEntity update(UUID roleExternalId, RoleEntity roleEntity, UUID projectExternalId) {
         ProjectEntity project = projectService.getOneProject(projectExternalId);
         RoleEntity role = getOneRole(roleExternalId, projectExternalId);
-
-        Optional<SummaryRoleProjection> existingRoleWithAuthority = roleRepository.findOneByAuthorityAndProject_ProjectExternalId(roleEntity.getAuthority(), projectExternalId);
-        if (existingRoleWithAuthority.isPresent() && !Objects.equals(existingRoleWithAuthority.get().getRoleExternalId(), role.getRoleExternalId())) {
-            String message = String.format("A role with the authority '%s' already exists in the project '%s'.",
-                    roleEntity.getAuthority(), project.getName());
-            throw new BusinessRuleException(message);
-        }
+        validateExistingAuthorityRoleForProject(roleEntity.getAuthority(), project, role.getRoleExternalId());
 
         role.setDescription(roleEntity.getDescription());
         role.setAuthority(roleEntity.getAuthority());
@@ -84,7 +71,21 @@ public class RoleServiceImpl implements RoleService {
             roleRepository.delete(roleFound);
             roleRepository.flush();
         } catch (DataIntegrityViolationException e) {
-            throw new BusinessRuleException("Role with ID %s cannot be removed as it is in use.".formatted(roleExternalId));
+            throw new EntityInUseException("Role with ID %s cannot be removed as it is in use.".formatted(roleExternalId));
         }
+    }
+
+    private void validateExistingAuthorityRoleForProject(String authority, ProjectEntity projectEntity, UUID roleExternalId) {
+        roleRepository.findOneByAuthorityAndProjectExternalId(authority, projectEntity.getProjectExternalId())
+                .ifPresent(role -> {
+                    String templateErrorMessage = String.format("A role with the authority '%s' already exists in the project '%s'.", authority, projectEntity.getName());
+                    if (Objects.isNull(roleExternalId)) {
+                        throw new BusinessRuleException(templateErrorMessage);
+                    }
+
+                    if (!Objects.equals(roleExternalId, role.getRoleExternalId())) {
+                        throw new BusinessRuleException(templateErrorMessage);
+                    }
+                });
     }
 }

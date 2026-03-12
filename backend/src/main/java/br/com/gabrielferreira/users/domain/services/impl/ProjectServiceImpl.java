@@ -65,15 +65,15 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private void validateExistingProjectName(String name, UUID projectExternalId) {
-        String templateErrorMessage = "A project with the name '%s' already exists.";
         projectRepository.findOneByName(name)
                 .ifPresent(project -> {
+                    String templateErrorMessage = String.format("A project with the name '%s' already exists.", name);
                     if (Objects.isNull(projectExternalId)) {
-                        throw new BusinessRuleException(templateErrorMessage.formatted(name));
+                        throw new BusinessRuleException(templateErrorMessage);
                     }
 
                     if (!Objects.equals(projectExternalId, project.getProjectExternalId())) {
-                        throw new BusinessRuleException(templateErrorMessage.formatted(name));
+                        throw new BusinessRuleException(templateErrorMessage);
                     }
                 });
     }

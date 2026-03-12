@@ -82,9 +82,10 @@ class ProjectServiceImplTest {
 
         BusinessRuleException exception = assertThrows(BusinessRuleException.class, () -> projectService.save(projectEntity));
 
-        assertEquals("A project with the name 'Project A' already exists.", exception.getMessage());
+        String expectedMessage = String.format("A project with the name '%s' already exists.", projectEntity.getName());
+        assertEquals(expectedMessage, exception.getMessage());
         verify(projectRepository).findOneByName(projectEntity.getName());
-        verify(projectRepository, never()).save(any());
+        verify(projectRepository, never()).save(projectEntity);
     }
 
     @Test
@@ -157,10 +158,11 @@ class ProjectServiceImplTest {
 
         BusinessRuleException exception = assertThrows(BusinessRuleException.class, () -> projectService.update(projectExternalId, projectEntity));
 
-        assertEquals("A project with the name 'Project A' already exists.", exception.getMessage());
+        String expectedMessage = String.format("A project with the name '%s' already exists.", projectEntity.getName());
+        assertEquals(expectedMessage, exception.getMessage());
         verify(projectRepository).findOneByProjectExternalId(projectExternalId);
         verify(projectRepository).findOneByName(projectEntity.getName());
-        verify(projectRepository, never()).save(any());
+        verify(projectRepository, never()).save(projectEntity);
     }
 
     @Test
@@ -174,6 +176,9 @@ class ProjectServiceImplTest {
         doNothing().when(projectRepository).flush();
 
         assertDoesNotThrow(() -> projectService.delete(projectExternalId));
+        verify(projectRepository).findOneByProjectExternalId(projectExternalId);
+        verify(projectRepository).delete(projectEntityFound);
+        verify(projectRepository).flush();
     }
 
     @Test
@@ -187,7 +192,11 @@ class ProjectServiceImplTest {
                 .delete(projectEntityFound);
 
         EntityInUseException exception = assertThrows(EntityInUseException.class, () -> projectService.delete(projectExternalId));
-        assertEquals("Project with ID 123e4567-e89b-12d3-a456-426614174000 cannot be removed as it is in use.", exception.getMessage());
+        String expectedMessage = String.format("Project with ID %s cannot be removed as it is in use.", projectExternalId);
+        assertEquals(expectedMessage, exception.getMessage());
+        verify(projectRepository).findOneByProjectExternalId(projectExternalId);
+        verify(projectRepository).delete(projectEntityFound);
+        verify(projectRepository, never()).flush();
     }
 
     @Test
