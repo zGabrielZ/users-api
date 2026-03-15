@@ -4,6 +4,7 @@ import br.com.gabrielferreira.users.api.dtos.output.page.PageResponse;
 import br.com.gabrielferreira.users.api.dtos.output.role.RoleOutputDTO;
 import br.com.gabrielferreira.users.domain.entities.RoleEntity;
 import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 import org.springframework.data.domain.Page;
 import org.springframework.util.CollectionUtils;
 
@@ -12,6 +13,8 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface RoleOutputMapper {
+
+    RoleOutputMapper INSTANCE = Mappers.getMapper(RoleOutputMapper.class);
 
     RoleOutputDTO toOutputDto(RoleEntity roleEntity);
 

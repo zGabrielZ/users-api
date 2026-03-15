@@ -9,11 +9,14 @@ import br.com.gabrielferreira.users.domain.repositories.filter.RoleFilter;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.mapstruct.factory.Mappers;
 
 import java.util.UUID;
 
 @Mapper(componentModel = "spring")
 public interface RoleInputMapper {
+
+    RoleInputMapper INSTANCE = Mappers.getMapper(RoleInputMapper.class);
 
     @Mapping(target = "description", source = "description", qualifiedByName = "trimIfNotBlank")
     @Mapping(target = "authority", source = "authority", qualifiedByName = "trimIfNotBlank")
