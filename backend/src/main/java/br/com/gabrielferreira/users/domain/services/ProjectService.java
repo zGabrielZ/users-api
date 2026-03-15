@@ -1,7 +1,7 @@
 package br.com.gabrielferreira.users.domain.services;
 
 import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
-import br.com.gabrielferreira.users.domain.repositories.filter.ProjectFilter;
+import br.com.gabrielferreira.users.domain.repositories.filter.project.ProjectFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

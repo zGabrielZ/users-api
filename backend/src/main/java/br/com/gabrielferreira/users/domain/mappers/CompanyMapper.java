@@ -3,7 +3,13 @@ package br.com.gabrielferreira.users.domain.mappers;
 import br.com.gabrielferreira.users.domain.entities.AddressEntity;
 import br.com.gabrielferreira.users.domain.entities.CompanyEntity;
 import br.com.gabrielferreira.users.domain.entities.ContactEntity;
-import org.mapstruct.*;
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Condition;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring")
 public interface CompanyMapper {

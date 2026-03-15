@@ -4,6 +4,7 @@ import br.com.gabrielferreira.users.api.dtos.output.page.PageResponse;
 import br.com.gabrielferreira.users.api.dtos.output.project.ProjectOutputDTO;
 import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
 import br.com.gabrielferreira.users.stub.project.ProjectEntityStub;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -15,18 +16,26 @@ import org.springframework.data.domain.PageRequest;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ProjectOutputMapperTest {
 
     private final ProjectOutputMapper mapper = ProjectOutputMapper.INSTANCE;
 
+    private ProjectEntity projectEntity;
+
+    @BeforeEach
+    void setUp() {
+        projectEntity = ProjectEntityStub.createProjectEntity(null, null);
+    }
+
     @Test
     @Order(1)
     void givenProjectEntityWhenToProjectOutputDtoThenReturnProjectCreated() {
-        ProjectEntity projectEntity = ProjectEntityStub.createProjectEntity(null, null);
-
         ProjectOutputDTO result = mapper.toProjectOutputDto(projectEntity);
         assertNotNull(result);
         assertEquals(projectEntity.getProjectExternalId(), result.projectExternalId());
@@ -53,7 +62,7 @@ class ProjectOutputMapperTest {
     @Order(3)
     void givenPageProjectEntitiesNotEmptyWhenToPageDtoThenReturnProjectCreated() {
         List<ProjectEntity> projectEntityList = new ArrayList<>();
-        projectEntityList.add(ProjectEntityStub.createProjectEntity(null, null));
+        projectEntityList.add(projectEntity);
         Page<ProjectEntity> projectEntities = new PageImpl<>(projectEntityList, PageRequest.of(0, 1), projectEntityList.size());
 
         PageResponse<ProjectOutputDTO> result = mapper.toPageDto(projectEntities);

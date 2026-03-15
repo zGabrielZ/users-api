@@ -5,7 +5,7 @@ import br.com.gabrielferreira.users.api.dtos.input.project.CreateProjectInputDTO
 import br.com.gabrielferreira.users.api.dtos.input.project.UpdateProjectInputDTO;
 import br.com.gabrielferreira.users.core.utils.Constants;
 import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
-import br.com.gabrielferreira.users.domain.repositories.filter.ProjectFilter;
+import br.com.gabrielferreira.users.domain.repositories.filter.project.ProjectFilter;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;

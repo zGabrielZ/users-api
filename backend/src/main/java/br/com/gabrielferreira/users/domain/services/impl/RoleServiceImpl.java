@@ -6,7 +6,7 @@ import br.com.gabrielferreira.users.domain.exceptions.BusinessRuleException;
 import br.com.gabrielferreira.users.domain.exceptions.EntityInUseException;
 import br.com.gabrielferreira.users.domain.exceptions.RoleNotFoundException;
 import br.com.gabrielferreira.users.domain.repositories.RoleRepository;
-import br.com.gabrielferreira.users.domain.repositories.filter.RoleFilter;
+import br.com.gabrielferreira.users.domain.repositories.filter.role.RoleFilter;
 import br.com.gabrielferreira.users.domain.services.ProjectService;
 import br.com.gabrielferreira.users.domain.services.RoleService;
 import br.com.gabrielferreira.users.domain.specs.RoleSpec;

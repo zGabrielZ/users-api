@@ -4,7 +4,7 @@ import br.com.gabrielferreira.users.api.dtos.filter.role.RoleFilterDTO;
 import br.com.gabrielferreira.users.api.dtos.input.role.CreateRoleInputDTO;
 import br.com.gabrielferreira.users.api.dtos.input.role.UpdateRoleInputDTO;
 import br.com.gabrielferreira.users.domain.entities.RoleEntity;
-import br.com.gabrielferreira.users.domain.repositories.filter.RoleFilter;
+import br.com.gabrielferreira.users.domain.repositories.filter.role.RoleFilter;
 import br.com.gabrielferreira.users.stub.role.RoleFilterDTOStub;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;

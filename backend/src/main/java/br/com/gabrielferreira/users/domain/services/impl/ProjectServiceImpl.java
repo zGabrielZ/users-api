@@ -5,7 +5,7 @@ import br.com.gabrielferreira.users.domain.exceptions.BusinessRuleException;
 import br.com.gabrielferreira.users.domain.exceptions.EntityInUseException;
 import br.com.gabrielferreira.users.domain.exceptions.ProjectNotFoundException;
 import br.com.gabrielferreira.users.domain.repositories.ProjectRepository;
-import br.com.gabrielferreira.users.domain.repositories.filter.ProjectFilter;
+import br.com.gabrielferreira.users.domain.repositories.filter.project.ProjectFilter;
 import br.com.gabrielferreira.users.domain.services.ProjectService;
 import br.com.gabrielferreira.users.domain.specs.ProjectSpec;
 import lombok.RequiredArgsConstructor;

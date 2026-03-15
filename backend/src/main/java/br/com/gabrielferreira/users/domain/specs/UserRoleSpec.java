@@ -3,8 +3,13 @@ package br.com.gabrielferreira.users.domain.specs;
 import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
 import br.com.gabrielferreira.users.domain.entities.RoleEntity;
 import br.com.gabrielferreira.users.domain.entities.UserEntity;
-import br.com.gabrielferreira.users.domain.repositories.filter.RoleFilter;
-import jakarta.persistence.criteria.*;
+import br.com.gabrielferreira.users.domain.repositories.filter.role.RoleFilter;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 

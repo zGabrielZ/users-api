@@ -4,7 +4,7 @@ import br.com.gabrielferreira.users.api.dtos.filter.project.ProjectFilterDTO;
 import br.com.gabrielferreira.users.api.dtos.input.project.CreateProjectInputDTO;
 import br.com.gabrielferreira.users.api.dtos.input.project.UpdateProjectInputDTO;
 import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
-import br.com.gabrielferreira.users.domain.repositories.filter.ProjectFilter;
+import br.com.gabrielferreira.users.domain.repositories.filter.project.ProjectFilter;
 import br.com.gabrielferreira.users.stub.project.ProjectFilterDTOStub;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;

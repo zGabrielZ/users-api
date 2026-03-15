@@ -2,7 +2,7 @@ package br.com.gabrielferreira.users.domain.specs;
 
 import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
 import br.com.gabrielferreira.users.domain.entities.RoleEntity;
-import br.com.gabrielferreira.users.domain.repositories.filter.RoleFilter;
+import br.com.gabrielferreira.users.domain.repositories.filter.role.RoleFilter;
 import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
 

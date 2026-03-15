@@ -9,7 +9,7 @@ import br.com.gabrielferreira.users.api.mappers.role.input.RoleInputMapper;
 import br.com.gabrielferreira.users.api.mappers.role.output.RoleOutputMapper;
 import br.com.gabrielferreira.users.core.utils.PageTranslate;
 import br.com.gabrielferreira.users.domain.entities.RoleEntity;
-import br.com.gabrielferreira.users.domain.repositories.filter.RoleFilter;
+import br.com.gabrielferreira.users.domain.repositories.filter.role.RoleFilter;
 import br.com.gabrielferreira.users.domain.services.RoleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,7 +25,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 

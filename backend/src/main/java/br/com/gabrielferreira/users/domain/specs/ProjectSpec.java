@@ -1,7 +1,7 @@
 package br.com.gabrielferreira.users.domain.specs;
 
 import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
-import br.com.gabrielferreira.users.domain.repositories.filter.ProjectFilter;
+import br.com.gabrielferreira.users.domain.repositories.filter.project.ProjectFilter;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.OffsetDateTime;

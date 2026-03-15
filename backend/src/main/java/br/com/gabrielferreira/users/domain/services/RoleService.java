@@ -1,7 +1,7 @@
 package br.com.gabrielferreira.users.domain.services;
 
 import br.com.gabrielferreira.users.domain.entities.RoleEntity;
-import br.com.gabrielferreira.users.domain.repositories.filter.RoleFilter;
+import br.com.gabrielferreira.users.domain.repositories.filter.role.RoleFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

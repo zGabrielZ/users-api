@@ -1,6 +1,10 @@
 package br.com.gabrielferreira.users.api.controllers;
 
-import br.com.gabrielferreira.users.api.dtos.input.user.*;
+import br.com.gabrielferreira.users.api.dtos.input.user.CreateUserInputDTO;
+import br.com.gabrielferreira.users.api.dtos.input.user.UpdateDocumentUserInputDTO;
+import br.com.gabrielferreira.users.api.dtos.input.user.UpdateEmailUserInputDTO;
+import br.com.gabrielferreira.users.api.dtos.input.user.UpdatePasswordUserInputDTO;
+import br.com.gabrielferreira.users.api.dtos.input.user.UpdateUserInputDTO;
 import br.com.gabrielferreira.users.api.dtos.output.user.UserOutputDTO;
 import br.com.gabrielferreira.users.api.mappers.user.input.UserInputMapper;
 import br.com.gabrielferreira.users.api.mappers.user.output.UserOutputMapper;
@@ -16,7 +20,15 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;

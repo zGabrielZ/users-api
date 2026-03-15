@@ -3,7 +3,7 @@ package br.com.gabrielferreira.users.domain.services.impl;
 import br.com.gabrielferreira.users.domain.entities.RoleEntity;
 import br.com.gabrielferreira.users.domain.entities.UserEntity;
 import br.com.gabrielferreira.users.domain.repositories.RoleRepository;
-import br.com.gabrielferreira.users.domain.repositories.filter.RoleFilter;
+import br.com.gabrielferreira.users.domain.repositories.filter.role.RoleFilter;
 import br.com.gabrielferreira.users.domain.services.RoleService;
 import br.com.gabrielferreira.users.domain.services.UserRoleService;
 import br.com.gabrielferreira.users.domain.services.UserService;

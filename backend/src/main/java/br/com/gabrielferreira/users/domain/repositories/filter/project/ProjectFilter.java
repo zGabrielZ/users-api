@@ -1,4 +1,4 @@
-package br.com.gabrielferreira.users.domain.repositories.filter;
+package br.com.gabrielferreira.users.domain.repositories.filter.project;
 
 import lombok.Builder;
 import org.apache.commons.lang3.StringUtils;

@@ -1,7 +1,9 @@
 package br.com.gabrielferreira.users.domain.services.impl;
 
 import br.com.gabrielferreira.users.core.utils.Mask;
-import br.com.gabrielferreira.users.domain.entities.*;
+import br.com.gabrielferreira.users.domain.entities.CompanyEntity;
+import br.com.gabrielferreira.users.domain.entities.DocumentEntity;
+import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
 import br.com.gabrielferreira.users.domain.enums.DocumentType;
 import br.com.gabrielferreira.users.domain.exceptions.BusinessRuleException;
 import br.com.gabrielferreira.users.domain.exceptions.CompanyNotFoundException;
@@ -16,7 +18,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
