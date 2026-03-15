@@ -6,6 +6,7 @@ import br.com.gabrielferreira.users.api.dtos.input.project.UpdateProjectInputDTO
 import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
 import br.com.gabrielferreira.users.domain.repositories.filter.project.ProjectFilter;
 import br.com.gabrielferreira.users.stub.project.ProjectFilterDTOStub;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@DisplayName("Tests for ProjectInputMapper")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ProjectInputMapperTest {
 

@@ -6,6 +6,7 @@ import br.com.gabrielferreira.users.api.dtos.input.role.UpdateRoleInputDTO;
 import br.com.gabrielferreira.users.domain.entities.RoleEntity;
 import br.com.gabrielferreira.users.domain.repositories.filter.role.RoleFilter;
 import br.com.gabrielferreira.users.stub.role.RoleFilterDTOStub;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@DisplayName("Tests for RoleInputMapper")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class RoleInputMapperTest {
 
