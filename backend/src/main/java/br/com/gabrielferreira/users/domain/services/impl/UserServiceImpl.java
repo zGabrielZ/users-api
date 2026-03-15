@@ -125,7 +125,7 @@ public class UserServiceImpl implements UserService {
             userRepository.delete(userFound);
             userRepository.flush();
         } catch (DataIntegrityViolationException e) {
-            throw new BusinessRuleException("User with ID %s cannot be removed as it is in use.".formatted(userExternalId));
+            throw new BusinessRuleException(String.format("User with ID %s cannot be removed as it is in use.", userExternalId));
         }
     }
 

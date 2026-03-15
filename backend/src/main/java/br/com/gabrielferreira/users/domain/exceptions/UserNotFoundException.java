@@ -13,6 +13,6 @@ public class UserNotFoundException extends EntityNotFoundException {
     }
 
     public UserNotFoundException(UUID userId, UUID projectId) {
-        this("User with ID %s not found for Project with ID %s".formatted(userId, projectId));
+        this(String.format("User with ID %s not found for Project with ID %s", userId, projectId));
     }
 }

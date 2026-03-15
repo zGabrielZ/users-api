@@ -71,7 +71,7 @@ public class RoleServiceImpl implements RoleService {
             roleRepository.delete(roleFound);
             roleRepository.flush();
         } catch (DataIntegrityViolationException e) {
-            throw new EntityInUseException("Role with ID %s cannot be removed as it is in use.".formatted(roleExternalId));
+            throw new EntityInUseException(String.format("Role with ID %s cannot be removed as it is in use.", roleExternalId));
         }
     }
 

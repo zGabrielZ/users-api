@@ -13,6 +13,6 @@ public class RoleNotFoundException extends EntityNotFoundException {
     }
 
     public RoleNotFoundException(UUID roleId, UUID projectId) {
-        this("Role with ID %s not found for Project with ID %s".formatted(roleId, projectId));
+        this(String.format("Role with ID %s not found for Project with ID %s", roleId, projectId));
     }
 }

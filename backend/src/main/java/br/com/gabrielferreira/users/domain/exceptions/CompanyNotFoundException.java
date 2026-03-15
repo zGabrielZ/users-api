@@ -13,6 +13,6 @@ public class CompanyNotFoundException extends EntityNotFoundException {
     }
 
     public CompanyNotFoundException(UUID companyId, UUID projectId) {
-        this("Company with ID %s not found for Project with ID %s".formatted(companyId, projectId));
+        this(String.format("Company with ID %s not found for Project with ID %s", companyId, projectId));
     }
 }
