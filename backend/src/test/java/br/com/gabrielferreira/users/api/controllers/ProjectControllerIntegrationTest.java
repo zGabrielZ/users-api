@@ -6,6 +6,7 @@ import br.com.gabrielferreira.users.api.dtos.input.project.UpdateProjectInputDTO
 import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
 import br.com.gabrielferreira.users.domain.entities.UserEntity;
 import br.com.gabrielferreira.users.stub.user.UserEntityStub;
+import com.jayway.jsonpath.JsonPath;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,8 +16,10 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -336,6 +339,7 @@ class ProjectControllerIntegrationTest extends BaseControllerIntegrationTest {
                 .name("Project C")
                 .build();
         projectEntity = projectRepository.saveAndFlush(projectEntity);
+        OffsetDateTime expectedCreatedAt = projectEntity.getCreatedAt();
 
         var projectFilterDTO = ProjectFilterDTO.builder()
                 .projectExternalId(projectEntity.getProjectExternalId())
@@ -355,7 +359,14 @@ class ProjectControllerIntegrationTest extends BaseControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].projectExternalId").value(projectEntity.getProjectExternalId().toString()))
                 .andExpect(jsonPath("$.content[0].name").value(projectEntity.getName()))
-                .andExpect(jsonPath("$.content[0].createdAt").value(projectEntity.getCreatedAt().toString()))
+                .andExpect(result -> {
+                    String json = result.getResponse().getContentAsString();
+
+                    String jsonDate = JsonPath.read(json, "$.content[0].createdAt");
+                    OffsetDateTime actual = OffsetDateTime.parse(jsonDate);
+
+                    assertEquals(expectedCreatedAt, actual);
+                })
                 .andExpect(jsonPath("$.size").value(5))
                 .andExpect(jsonPath("$.totalElements").value(3))
                 .andExpect(jsonPath("$.totalPages").value(1))

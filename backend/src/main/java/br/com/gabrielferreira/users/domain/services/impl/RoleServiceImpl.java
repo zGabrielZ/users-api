@@ -11,11 +11,11 @@ import br.com.gabrielferreira.users.domain.services.ProjectService;
 import br.com.gabrielferreira.users.domain.services.RoleService;
 import br.com.gabrielferreira.users.domain.specs.RoleSpec;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -47,9 +47,8 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public RoleEntity update(UUID roleExternalId, RoleEntity roleEntity, UUID projectExternalId) {
-        ProjectEntity project = projectService.getOneProject(projectExternalId);
         RoleEntity role = getOneRole(roleExternalId, projectExternalId);
-        validateExistingAuthorityRoleForProject(roleEntity.getAuthority(), project, role.getRoleExternalId());
+        validateExistingAuthorityRoleForProject(roleEntity.getAuthority(), role.getProject(), role.getRoleExternalId());
 
         role.setDescription(roleEntity.getDescription());
         role.setAuthority(roleEntity.getAuthority());
@@ -64,15 +63,14 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     @Override
     public void delete(UUID roleExternalId, UUID projectExternalId) {
-        ProjectEntity project = projectService.getOneProject(projectExternalId);
-        RoleEntity roleFound = getOneRole(roleExternalId, project.getProjectExternalId());
+        RoleEntity roleFound = getOneRole(roleExternalId, projectExternalId);
 
-        try {
-            roleRepository.delete(roleFound);
-            roleRepository.flush();
-        } catch (DataIntegrityViolationException e) {
+        if (!CollectionUtils.isEmpty(roleFound.getUsers())) {
             throw new EntityInUseException(String.format("Role with ID %s cannot be removed as it is in use.", roleExternalId));
         }
+
+        roleRepository.delete(roleFound);
+        roleRepository.flush();
     }
 
     private void validateExistingAuthorityRoleForProject(String authority, ProjectEntity projectEntity, UUID roleExternalId) {

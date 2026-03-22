@@ -2,6 +2,7 @@ package br.com.gabrielferreira.users.domain.services.impl;
 
 import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
 import br.com.gabrielferreira.users.domain.entities.RoleEntity;
+import br.com.gabrielferreira.users.domain.entities.UserEntity;
 import br.com.gabrielferreira.users.domain.exceptions.BusinessRuleException;
 import br.com.gabrielferreira.users.domain.exceptions.EntityInUseException;
 import br.com.gabrielferreira.users.domain.exceptions.RoleNotFoundException;
@@ -11,6 +12,7 @@ import br.com.gabrielferreira.users.domain.repositories.projection.role.SummaryR
 import br.com.gabrielferreira.users.domain.services.ProjectService;
 import br.com.gabrielferreira.users.stub.project.ProjectEntityStub;
 import br.com.gabrielferreira.users.stub.role.RoleEntityStub;
+import br.com.gabrielferreira.users.stub.user.UserEntityStub;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -22,13 +24,13 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,7 +39,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -171,9 +172,6 @@ class RoleServiceImplTest {
                 .authority("ROLE_ADMIN_ADMIN")
                 .build();
 
-        when(projectService.getOneProject(projectExternalId))
-                .thenReturn(projectEntity);
-
         RoleEntity roleEntityFound = RoleEntityStub.createRoleEntity(
                 "Administrator",
                 "ROLE_ADMIN",
@@ -196,7 +194,6 @@ class RoleServiceImplTest {
         RoleEntity roleEntityResult = roleService.update(roleExternalId, role, projectExternalId);
         assertNotNull(roleEntityResult);
         assertEquals(roleEntityUpdated, roleEntityResult);
-        verify(projectService).getOneProject(projectExternalId);
         verify(roleRepository).findOneByRoleExternalIdAndProjectExternalId(roleExternalId, projectExternalId);
         verify(roleRepository).findOneByAuthorityAndProjectExternalId(role.getAuthority(), projectExternalId);
         verify(roleRepository).save(roleEntityFound);
@@ -209,9 +206,6 @@ class RoleServiceImplTest {
                 .description("Administrator Administrator Administrator")
                 .authority("ROLE_ADMIN_ADMIN")
                 .build();
-
-        when(projectService.getOneProject(projectExternalId))
-                .thenReturn(projectEntity);
 
         RoleEntity roleEntityFound = RoleEntityStub.createRoleEntity(
                 "Administrator",
@@ -231,7 +225,6 @@ class RoleServiceImplTest {
 
         String expectedMessage = String.format("A role with the authority '%s' already exists in the project '%s'.", role.getAuthority(), projectEntity.getName());
         assertEquals(expectedMessage, exception.getMessage());
-        verify(projectService).getOneProject(projectExternalId);
         verify(roleRepository).findOneByRoleExternalIdAndProjectExternalId(roleExternalId, projectExternalId);
         verify(roleRepository).findOneByAuthorityAndProjectExternalId(role.getAuthority(), projectExternalId);
         verify(roleRepository, never()).save(roleEntityFound);
@@ -240,9 +233,6 @@ class RoleServiceImplTest {
     @Test
     @Order(7)
     void givenRoleExternalIdWithProjectExternalIdWhenDeleteRoleThenReturnSuccess() {
-        when(projectService.getOneProject(projectExternalId))
-                .thenReturn(projectEntity);
-
         RoleEntity roleEntityFound = RoleEntityStub.createRoleEntity(
                 "Administrator",
                 "ROLE_ADMIN",
@@ -257,7 +247,6 @@ class RoleServiceImplTest {
         doNothing().when(roleRepository).flush();
 
         assertDoesNotThrow(() -> roleService.delete(roleExternalId, projectExternalId));
-        verify(projectService).getOneProject(projectExternalId);
         verify(roleRepository).findOneByRoleExternalIdAndProjectExternalId(roleExternalId, projectExternalId);
         verify(roleRepository).delete(roleEntityFound);
         verify(roleRepository).flush();
@@ -266,27 +255,24 @@ class RoleServiceImplTest {
     @Test
     @Order(8)
     void givenRoleExternalIdWithProjectExternalIdWhenDeleteRoleThenThrowDueToUsedEntity() {
-        when(projectService.getOneProject(projectExternalId))
-                .thenReturn(projectEntity);
-
         RoleEntity roleEntityFound = RoleEntityStub.createRoleEntity(
                 "Administrator",
                 "ROLE_ADMIN",
                 roleExternalId,
                 projectEntity
         );
+        UserEntity userEntity = UserEntityStub.createUserEntity(projectEntity);
+        roleEntityFound.setUsers(new ArrayList<>());
+        roleEntityFound.getUsers().add(userEntity);
 
-        doThrow(DataIntegrityViolationException.class).when(roleRepository)
-                .delete(roleEntityFound);
         when(roleRepository.findOneByRoleExternalIdAndProjectExternalId(roleExternalId, projectExternalId))
                 .thenReturn(Optional.of(roleEntityFound));
 
         EntityInUseException exception = assertThrows(EntityInUseException.class, () -> roleService.delete(roleExternalId, projectExternalId));
         String expectedMessage = String.format("Role with ID %s cannot be removed as it is in use.", roleExternalId);
         assertEquals(expectedMessage, exception.getMessage());
-        verify(projectService).getOneProject(projectExternalId);
         verify(roleRepository).findOneByRoleExternalIdAndProjectExternalId(roleExternalId, projectExternalId);
-        verify(roleRepository).delete(roleEntityFound);
+        verify(roleRepository, never()).delete(roleEntityFound);
         verify(roleRepository, never()).flush();
     }
 
