@@ -8,7 +8,7 @@ import br.com.gabrielferreira.users.domain.enums.DocumentType;
 import br.com.gabrielferreira.users.domain.exceptions.BusinessRuleException;
 import br.com.gabrielferreira.users.domain.exceptions.UserNotFoundException;
 import br.com.gabrielferreira.users.domain.repositories.UserRepository;
-import br.com.gabrielferreira.users.domain.repositories.projection.SummaryUserProjection;
+import br.com.gabrielferreira.users.domain.repositories.projection.user.SummaryUserProjection;
 import br.com.gabrielferreira.users.domain.services.ProjectService;
 import br.com.gabrielferreira.users.domain.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserEntity getOneUser(UUID userExternalId, UUID projectExternalId) {
-        return userRepository.findOneByUserExternalIdAndProject_ProjectExternalId(userExternalId, projectExternalId)
+        return userRepository.findOneByUserExternalIdAndProjectExternalId(userExternalId, projectExternalId)
                 .orElseThrow(() -> new UserNotFoundException(userExternalId, projectExternalId));
     }
 
@@ -67,15 +67,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserEntity updateDocument(UUID userExternalId, DocumentEntity documentEntity, UUID projectExternalId) {
         UserEntity userFound = getOneUser(userExternalId, projectExternalId);
-        DocumentEntity document = userFound.getDocument();
-        documentEntity.setNumber(Mask.documentWithoutMask(documentEntity.getType(), documentEntity.getNumber()));
+        DocumentEntity documentFound = userFound.getDocument();
 
-        validateExistingUserWithDocument(document);
+        documentEntity.setNumber(Mask.documentWithoutMask(documentEntity.getType(), documentEntity.getNumber()));
+        validateExistingUserWithDocument(documentFound);
         validateExistingUserWithDocumentAndProject(documentEntity, projectExternalId);
 
-        document.setType(documentEntity.getType());
-        document.setNumber(documentEntity.getNumber());
-        userFound.setDocument(document);
+        documentFound.setType(documentEntity.getType());
+        documentFound.setNumber(documentEntity.getNumber());
+        userFound.setDocument(documentFound);
         return userRepository.save(userFound);
     }
 
@@ -84,7 +84,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserEntity updateEmail(UUID userExternalId, String newEmail, UUID projectExternalId) {
         UserEntity userFound = getOneUser(userExternalId, projectExternalId);
-        Optional<SummaryUserProjection> existingUserWithEmailAndProject = userRepository.findOneByEmailAndProject_ProjectExternalId(
+        Optional<SummaryUserProjection> existingUserWithEmailAndProject = userRepository.findOneByEmailAndProjectExternalId(
                 newEmail,
                 projectExternalId
         );
@@ -130,7 +130,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void validateExistingUserWithEmailAndProject(String email, UUID projectExternalId) {
-        Optional<SummaryUserProjection> existingUserWithEmailAndProject = userRepository.findOneByEmailAndProject_ProjectExternalId(
+        Optional<SummaryUserProjection> existingUserWithEmailAndProject = userRepository.findOneByEmailAndProjectExternalId(
                 email,
                 projectExternalId
         );

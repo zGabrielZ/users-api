@@ -2,7 +2,7 @@ package br.com.gabrielferreira.users.domain.repositories;
 
 import br.com.gabrielferreira.users.domain.entities.UserEntity;
 import br.com.gabrielferreira.users.domain.enums.DocumentType;
-import br.com.gabrielferreira.users.domain.repositories.projection.SummaryUserProjection;
+import br.com.gabrielferreira.users.domain.repositories.projection.user.SummaryUserProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,7 +21,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
                     "WHERE u.email = :email " +
                     "AND p.projectExternalId = :projectExternalId"
     )
-    Optional<SummaryUserProjection> findOneByEmailAndProject_ProjectExternalId(@Param("email") String email, @Param("projectExternalId") UUID projectExternalId);
+    Optional<SummaryUserProjection> findOneByEmailAndProjectExternalId(@Param("email") String email, @Param("projectExternalId") UUID projectExternalId);
 
     @Query(
             "SELECT u.userExternalId AS userExternalId, u.email AS email, p.projectExternalId AS projectExternalId, " +
@@ -40,5 +40,5 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
                     "WHERE u.userExternalId = :userExternalId " +
                     "AND u.project.projectExternalId = :projectExternalId"
     )
-    Optional<UserEntity> findOneByUserExternalIdAndProject_ProjectExternalId(@Param("userExternalId") UUID userExternalId, @Param("projectExternalId") UUID projectExternalId);
+    Optional<UserEntity> findOneByUserExternalIdAndProjectExternalId(@Param("userExternalId") UUID userExternalId, @Param("projectExternalId") UUID projectExternalId);
 }
