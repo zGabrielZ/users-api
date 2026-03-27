@@ -102,11 +102,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserEntity updatePassword(UUID userExternalId, String oldPassword, String newPassword, UUID projectExternalId) {
         UserEntity userFound = getOneUser(userExternalId, projectExternalId);
-        if (!StringUtils.equals(oldPassword, userFound.getPassword())) {
+        if (!passwordEncoder.matches(oldPassword, userFound.getPassword())) {
             throw new BusinessRuleException("Old password does not match");
         }
 
-        userFound.setPassword(newPassword);
+        userFound.setPassword(passwordEncoder.encode(newPassword));
         return userRepository.save(userFound);
     }
 

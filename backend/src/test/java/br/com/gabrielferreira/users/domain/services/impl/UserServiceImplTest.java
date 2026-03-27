@@ -3,15 +3,14 @@ package br.com.gabrielferreira.users.domain.services.impl;
 import br.com.gabrielferreira.users.domain.entities.DocumentEntity;
 import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
 import br.com.gabrielferreira.users.domain.entities.UserEntity;
-import br.com.gabrielferreira.users.domain.enums.DocumentType;
 import br.com.gabrielferreira.users.domain.exceptions.BusinessRuleException;
 import br.com.gabrielferreira.users.domain.exceptions.UserNotFoundException;
 import br.com.gabrielferreira.users.domain.repositories.UserRepository;
 import br.com.gabrielferreira.users.domain.repositories.projection.user.SummaryUserProjection;
 import br.com.gabrielferreira.users.domain.services.ProjectService;
+import br.com.gabrielferreira.users.stub.document.DocumentEntityStub;
 import br.com.gabrielferreira.users.stub.project.ProjectEntityStub;
 import br.com.gabrielferreira.users.stub.user.UserEntityStub;
-import br.com.gabrielferreira.users.utils.GenerateCPFUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -114,10 +113,7 @@ class UserServiceImplTest {
         when(passwordEncoder.encode(userEntity.getPassword()))
                 .thenReturn(encodedPassword);
 
-        DocumentEntity expectedDocumentEntity = DocumentEntity.builder()
-                .type(DocumentType.NONE)
-                .user(userEntity)
-                .build();
+        DocumentEntity expectedDocumentEntity = DocumentEntityStub.documentNoneEntityCreated();
         UserEntity userEntityCreated = UserEntityStub.userEntityCreated(projectEntity, encodedPassword, expectedDocumentEntity);
         when(userRepository.save(userEntity))
                 .thenReturn(userEntityCreated);
@@ -157,10 +153,7 @@ class UserServiceImplTest {
     @Test
     @Order(4)
     void givenUserExternalIdWithProjectExternalIdWhenGetOneUserThenReturnUserEntity() {
-        DocumentEntity document = DocumentEntity.builder()
-                .type(DocumentType.CPF)
-                .number(GenerateCPFUtils.generateCPF())
-                .build();
+        DocumentEntity document = DocumentEntityStub.documentCpfEntityCreated();
         UserEntity userEntity = UserEntityStub.userEntityCreated(projectEntity, encodedPassword, document);
 
         when(userRepository.findOneByUserExternalIdAndProjectExternalId(userExternalId, projectExternalId))
@@ -194,10 +187,7 @@ class UserServiceImplTest {
                 .lastName("Smith")
                 .build();
 
-        DocumentEntity document = DocumentEntity.builder()
-                .type(DocumentType.CPF)
-                .number(GenerateCPFUtils.generateCPF())
-                .build();
+        DocumentEntity document = DocumentEntityStub.documentCpfEntityCreated();
         UserEntity userEntityFound = UserEntityStub.userEntityCreated(projectEntity, encodedPassword, document);
         when(userRepository.findOneByUserExternalIdAndProjectExternalId(userExternalId, projectExternalId))
                 .thenReturn(Optional.of(userEntityFound));
@@ -218,14 +208,9 @@ class UserServiceImplTest {
     @Test
     @Order(7)
     void givenUserExternalIdWithDocumentEntityAndProjectExternalIdWhenUpdateDocumentThenReturnDocumentEntityUpdated() {
-        DocumentEntity document = DocumentEntity.builder()
-                .type(DocumentType.CPF)
-                .number(GenerateCPFUtils.generateCPF())
-                .build();
+        DocumentEntity document = DocumentEntityStub.documentCpfEntityCreated();
 
-        DocumentEntity expectedDocumentEntity = DocumentEntity.builder()
-                .type(DocumentType.NONE)
-                .build();
+        DocumentEntity expectedDocumentEntity = DocumentEntityStub.documentNoneEntityCreated();
         UserEntity userEntityFound = UserEntityStub.userEntityCreated(projectEntity, encodedPassword, expectedDocumentEntity);
         when(userRepository.findOneByUserExternalIdAndProjectExternalId(userExternalId, projectExternalId))
                 .thenReturn(Optional.of(userEntityFound));
@@ -252,10 +237,7 @@ class UserServiceImplTest {
     @Test
     @Order(8)
     void givenUserExternalIdWithDocumentEntityAndProjectExternalIdWhenUpdateDocumentThenNotSaveDueToExistingNumber() {
-        DocumentEntity document = DocumentEntity.builder()
-                .type(DocumentType.CPF)
-                .number(GenerateCPFUtils.generateCPF())
-                .build();
+        DocumentEntity document = DocumentEntityStub.documentCpfEntityCreated();
 
         UserEntity userEntityFound = UserEntityStub.userEntityCreated(projectEntity, encodedPassword, document);
         when(userRepository.findOneByUserExternalIdAndProjectExternalId(userExternalId, projectExternalId))
@@ -273,14 +255,9 @@ class UserServiceImplTest {
     @Test
     @Order(9)
     void givenUserExternalIdWithDocumentEntityAndProjectExternalIdWhenUpdateDocumentThenNotSaveDueToExistingDocumentInProject() {
-        DocumentEntity document = DocumentEntity.builder()
-                .type(DocumentType.CPF)
-                .number(GenerateCPFUtils.generateCPF())
-                .build();
+        DocumentEntity document = DocumentEntityStub.documentCpfEntityCreated();
 
-        DocumentEntity expectedDocumentEntity = DocumentEntity.builder()
-                .type(DocumentType.NONE)
-                .build();
+        DocumentEntity expectedDocumentEntity = DocumentEntityStub.documentNoneEntityCreated();
         UserEntity userEntityFound = UserEntityStub.userEntityCreated(projectEntity, encodedPassword, expectedDocumentEntity);
         when(userRepository.findOneByUserExternalIdAndProjectExternalId(userExternalId, projectExternalId))
                 .thenReturn(Optional.of(userEntityFound));
@@ -295,6 +272,104 @@ class UserServiceImplTest {
         assertEquals(expectedMessage, businessRuleException.getMessage());
         verify(userRepository).findOneByUserExternalIdAndProjectExternalId(userExternalId, projectExternalId);
         verify(userRepository).findOneUserByDocumentAndProjectExternalId(document.getType(), document.getNumber(), projectExternalId);
+        verify(userRepository, never()).save(userEntityFound);
+    }
+
+    @Test
+    @Order(10)
+    void givenUserExternalIdWithNewEmailAndProjectExternalIdWhenUpdateEmailThenUserEmailUpdated() {
+        String newEmail = "user@email.com";
+
+        UserEntity userEntityFound = UserEntityStub.userEntityCreated(projectEntity, encodedPassword, DocumentEntityStub.documentCpfEntityCreated());
+        when(userRepository.findOneByUserExternalIdAndProjectExternalId(userExternalId, projectExternalId))
+                .thenReturn(Optional.of(userEntityFound));
+
+        when(userRepository.findOneByEmailAndProjectExternalId(newEmail, projectExternalId))
+                .thenReturn(Optional.empty());
+
+        userEntityFound.setEmail(newEmail);
+        when(userRepository.save(userEntityFound))
+                .thenReturn(userEntityFound);
+
+        UserEntity userEntityResult = userService.updateEmail(userExternalId, newEmail, projectExternalId);
+
+        assertNotNull(userEntityResult);
+        assertEquals(userEntityFound, userEntityResult);
+        verify(userRepository).findOneByUserExternalIdAndProjectExternalId(userExternalId, projectExternalId);
+        verify(userRepository).findOneByEmailAndProjectExternalId(newEmail, projectExternalId);
+        verify(userRepository).save(userEntityFound);
+    }
+
+    @Test
+    @Order(11)
+    void givenUserExternalIdWithNewEmailAndProjectExternalIdWhenUpdateEmailThenNotUpdateDueToEmailAlreadyExists() {
+        String newEmail = "user@email.com";
+
+        UserEntity userEntityFound = UserEntityStub.userEntityCreated(projectEntity, encodedPassword, DocumentEntityStub.documentCpfEntityCreated());
+        when(userRepository.findOneByUserExternalIdAndProjectExternalId(userExternalId, projectExternalId))
+                .thenReturn(Optional.of(userEntityFound));
+
+        SummaryUserProjection summaryUserProjection = mock(SummaryUserProjection.class);
+        when(userRepository.findOneByEmailAndProjectExternalId(newEmail, projectExternalId))
+                .thenReturn(Optional.of(summaryUserProjection));
+
+        BusinessRuleException businessRuleException = assertThrows(BusinessRuleException.class, () -> userService.updateEmail(userExternalId, newEmail, projectExternalId));
+
+        String expectedMessage = "Already exists a user with this email in the project";
+        assertEquals(expectedMessage, businessRuleException.getMessage());
+        verify(userRepository).findOneByUserExternalIdAndProjectExternalId(userExternalId, projectExternalId);
+        verify(userRepository).findOneByEmailAndProjectExternalId(newEmail, projectExternalId);
+        verify(userRepository, never()).save(userEntityFound);
+    }
+
+    @Test
+    @Order(12)
+    void givenUserExternalIdWithPasswordAndProjectExternalIdWhenUpdatePasswordThenUserPasswordUpdated() {
+         String newPassword = "newPassword";
+
+        UserEntity userEntityFound = UserEntityStub.userEntityCreated(projectEntity, encodedPassword, DocumentEntityStub.documentCpfEntityCreated());
+        when(userRepository.findOneByUserExternalIdAndProjectExternalId(userExternalId, projectExternalId))
+                .thenReturn(Optional.of(userEntityFound));
+
+        when(passwordEncoder.matches(password, userEntityFound.getPassword()))
+                .thenReturn(true);
+
+        when(passwordEncoder.encode(newPassword))
+                .thenReturn(encodedPassword);
+
+        userEntityFound.setPassword(encodedPassword);
+        when(userRepository.save(userEntityFound))
+                .thenReturn(userEntityFound);
+
+        UserEntity userEntityResult = userService.updatePassword(userExternalId, password, newPassword, projectExternalId);
+
+        assertNotNull(userEntityResult);
+        assertEquals(userEntityFound, userEntityResult);
+        verify(userRepository).findOneByUserExternalIdAndProjectExternalId(userExternalId, projectExternalId);
+        verify(passwordEncoder).matches(password, userEntityFound.getPassword());
+        verify(passwordEncoder).encode(newPassword);
+        verify(userRepository).save(userEntityFound);
+    }
+
+    @Test
+    @Order(13)
+    void givenUserExternalIdWithPasswordAndProjectExternalIdWhenUpdatePasswordThenNotUpdateDueToOldPasswordDoesNotMatch() {
+        String newPassword = "newPassword";
+
+        UserEntity userEntityFound = UserEntityStub.userEntityCreated(projectEntity, encodedPassword, DocumentEntityStub.documentCpfEntityCreated());
+        when(userRepository.findOneByUserExternalIdAndProjectExternalId(userExternalId, projectExternalId))
+                .thenReturn(Optional.of(userEntityFound));
+
+        when(passwordEncoder.matches(password, userEntityFound.getPassword()))
+                .thenReturn(false);
+
+        BusinessRuleException businessRuleException = assertThrows(BusinessRuleException.class, () -> userService.updatePassword(userExternalId, password, newPassword, projectExternalId));
+
+        String expectedMessage = "Old password does not match";
+        assertEquals(expectedMessage, businessRuleException.getMessage());
+        verify(userRepository).findOneByUserExternalIdAndProjectExternalId(userExternalId, projectExternalId);
+        verify(passwordEncoder).matches(password, userEntityFound.getPassword());
+        verify(passwordEncoder, never()).encode(newPassword);
         verify(userRepository, never()).save(userEntityFound);
     }
 }
