@@ -4,10 +4,16 @@ import br.com.gabrielferreira.users.domain.entities.DocumentEntity;
 import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
 import br.com.gabrielferreira.users.domain.entities.UserEntity;
 import br.com.gabrielferreira.users.domain.enums.DocumentType;
+import br.com.gabrielferreira.users.stub.document.DocumentEntityStub;
+import br.com.gabrielferreira.users.stub.project.ProjectEntityStub;
 import br.com.gabrielferreira.users.utils.GenerateCPFUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class UserEntityStub {
@@ -47,5 +53,13 @@ public class UserEntityStub {
                 .document(documentEntity)
                 .createdAt(FIXED_DATE)
                 .build();
+    }
+
+    public static Page<UserEntity> createPageOfUserEntities(Pageable pageable) {
+        ProjectEntity projectEntity = ProjectEntityStub.createProjectEntity(null, null);
+        DocumentEntity document = DocumentEntityStub.documentCpfEntityCreated();
+        UserEntity userEntity = userEntityCreated(projectEntity, "encodedPassword", document);
+        List<UserEntity> users = List.of(userEntity);
+        return new PageImpl<>(users, pageable, users.size());
     }
 }

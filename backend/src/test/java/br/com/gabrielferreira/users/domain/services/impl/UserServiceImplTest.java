@@ -3,14 +3,18 @@ package br.com.gabrielferreira.users.domain.services.impl;
 import br.com.gabrielferreira.users.domain.entities.DocumentEntity;
 import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
 import br.com.gabrielferreira.users.domain.entities.UserEntity;
+import br.com.gabrielferreira.users.domain.enums.DocumentType;
 import br.com.gabrielferreira.users.domain.exceptions.BusinessRuleException;
 import br.com.gabrielferreira.users.domain.exceptions.UserNotFoundException;
 import br.com.gabrielferreira.users.domain.repositories.UserRepository;
+import br.com.gabrielferreira.users.domain.repositories.filter.document.DocumentFilter;
+import br.com.gabrielferreira.users.domain.repositories.filter.user.UserFilter;
 import br.com.gabrielferreira.users.domain.repositories.projection.user.SummaryUserProjection;
 import br.com.gabrielferreira.users.domain.services.ProjectService;
 import br.com.gabrielferreira.users.stub.document.DocumentEntityStub;
 import br.com.gabrielferreira.users.stub.project.ProjectEntityStub;
 import br.com.gabrielferreira.users.stub.user.UserEntityStub;
+import br.com.gabrielferreira.users.utils.GenerateCPFUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -18,17 +22,24 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -61,6 +72,8 @@ class UserServiceImplTest {
 
     private UUID userExternalId;
 
+    private OffsetDateTime offsetDateTime;
+
     @BeforeEach
     void setUp() {
         encodedPassword = "encodedPassword";
@@ -68,6 +81,7 @@ class UserServiceImplTest {
         projectExternalId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
         userExternalId = UUID.fromString("b01baffc-f4fe-4ff8-91d4-d4eeb1c7d944");
         projectEntity = ProjectEntityStub.createProjectEntity("Project A", projectExternalId);
+        offsetDateTime = OffsetDateTime.parse("2026-01-01T10:00:00Z");
     }
 
     @Test
@@ -371,5 +385,34 @@ class UserServiceImplTest {
         verify(passwordEncoder).matches(password, userEntityFound.getPassword());
         verify(passwordEncoder, never()).encode(newPassword);
         verify(userRepository, never()).save(userEntityFound);
+    }
+
+    @Test
+    @Order(14)
+    void givenUserFilterWithPageableWhenGetAllUsersThenReturnPageOfUserEntity() {
+        var projectFilter = UserFilter.builder()
+                .userExternalId(userExternalId)
+                .firstName("John")
+                .lastName("Doe")
+                .email("john@email.com")
+                .document(
+                        DocumentFilter.builder()
+                                .type(DocumentType.CPF)
+                                .number(GenerateCPFUtils.generateCPF())
+                                .build()
+                )
+                .createdAtFrom(offsetDateTime)
+                .createdAtTo(offsetDateTime)
+                .build();
+
+        var pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Order.asc("name")));
+        Page<UserEntity> userEntityPage = UserEntityStub.createPageOfUserEntities(pageRequest);
+        when(userRepository.findAll(ArgumentMatchers.<Specification<UserEntity>>any(), eq(pageRequest)))
+                .thenReturn(userEntityPage);
+
+        Page<UserEntity> resultPage = userService.getAllUsers(projectExternalId, projectFilter, pageRequest);
+        assertNotNull(resultPage);
+        assertEquals(1, resultPage.getTotalElements());
+        verify(userRepository).findAll(ArgumentMatchers.<Specification<UserEntity>>any(), eq(pageRequest));
     }
 }
