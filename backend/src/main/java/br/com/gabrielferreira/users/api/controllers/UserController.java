@@ -1,15 +1,19 @@
 package br.com.gabrielferreira.users.api.controllers;
 
+import br.com.gabrielferreira.users.api.dtos.filter.user.UserFilterDTO;
 import br.com.gabrielferreira.users.api.dtos.input.user.CreateUserInputDTO;
 import br.com.gabrielferreira.users.api.dtos.input.user.UpdateDocumentUserInputDTO;
 import br.com.gabrielferreira.users.api.dtos.input.user.UpdateEmailUserInputDTO;
 import br.com.gabrielferreira.users.api.dtos.input.user.UpdatePasswordUserInputDTO;
 import br.com.gabrielferreira.users.api.dtos.input.user.UpdateUserInputDTO;
+import br.com.gabrielferreira.users.api.dtos.output.page.PageResponse;
 import br.com.gabrielferreira.users.api.dtos.output.user.UserOutputDTO;
 import br.com.gabrielferreira.users.api.mappers.user.input.UserInputMapper;
 import br.com.gabrielferreira.users.api.mappers.user.output.UserOutputMapper;
+import br.com.gabrielferreira.users.core.utils.PageTranslate;
 import br.com.gabrielferreira.users.domain.entities.DocumentEntity;
 import br.com.gabrielferreira.users.domain.entities.UserEntity;
+import br.com.gabrielferreira.users.domain.repositories.filter.user.UserFilter;
 import br.com.gabrielferreira.users.domain.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +22,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,7 +39,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Users", description = "User management endpoints")
@@ -230,8 +238,11 @@ public class UserController {
                     )
             }
     )
-    @GetMapping
-    public ResponseEntity<List<UserOutputDTO>> findAll(
+    @PostMapping("/search")
+    public ResponseEntity<PageResponse<UserOutputDTO>> findAll(
+            @ParameterObject @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.ASC)
+            Pageable pageable,
+            @Valid @RequestBody UserFilterDTO filter,
             @Parameter(
                     description = "Project external identifier",
                     example = "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -239,12 +250,12 @@ public class UserController {
             )
             @RequestHeader ("projectExternalId") UUID projectExternalId
     ) {
-        List<UserEntity> userEntities = userService.getAllUsers(projectExternalId);
-        List<UserOutputDTO> userOutputDtos = userEntities.stream()
-                .map(userOutputMapper::toOutputDto)
-                .toList();
+        pageable = PageTranslate.toPageable(pageable, PageTranslate.getUserPageableFieldsMapping());
+        UserFilter userFilter = userInputMapper.toUserFilter(filter);
+        Page<UserEntity> userEntities = userService.getAllUsers(projectExternalId, userFilter, pageable);
 
-        return ResponseEntity.ok(userOutputDtos);
+        PageResponse<UserOutputDTO> userOutputDto = userOutputMapper.toPageDto(userEntities);
+        return ResponseEntity.ok(userOutputDto);
     }
 
     @Operation(summary = "Delete a user by external ID")

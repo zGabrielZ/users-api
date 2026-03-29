@@ -8,18 +8,20 @@ import br.com.gabrielferreira.users.domain.enums.DocumentType;
 import br.com.gabrielferreira.users.domain.exceptions.BusinessRuleException;
 import br.com.gabrielferreira.users.domain.exceptions.UserNotFoundException;
 import br.com.gabrielferreira.users.domain.repositories.UserRepository;
+import br.com.gabrielferreira.users.domain.repositories.filter.user.UserFilter;
 import br.com.gabrielferreira.users.domain.repositories.projection.user.SummaryUserProjection;
 import br.com.gabrielferreira.users.domain.services.ProjectService;
 import br.com.gabrielferreira.users.domain.services.UserService;
+import br.com.gabrielferreira.users.domain.specs.UserSpec;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -112,10 +114,12 @@ public class UserServiceImpl implements UserService {
 
     // TODO: deve criar um outro endpoint que valida o codigo enviado por email e atualiza o email do usuario
 
-    // TODO: implement pagination
     @Override
-    public List<UserEntity> getAllUsers(UUID projectExternalId) {
-        return Collections.emptyList();
+    public Page<UserEntity> getAllUsers(UUID projectExternalId, UserFilter userFilter, Pageable pageable) {
+        return userRepository.findAll(
+                new UserSpec(projectExternalId, userFilter),
+                pageable
+        );
     }
 
     @Override

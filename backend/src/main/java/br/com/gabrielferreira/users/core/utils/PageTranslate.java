@@ -51,4 +51,18 @@ public class PageTranslate {
         fieldsMapping.put(CREATED_AT, CREATED_AT);
         return fieldsMapping;
     }
+
+    public static Map<String, String> getUserPageableFieldsMapping() {
+        HashMap<String, String> fieldsMapping = new HashMap<>();
+        // DTO - Entity
+        fieldsMapping.put("userExternalId", "userExternalId");
+        fieldsMapping.put("firstName", "firstName");
+        fieldsMapping.put("lastName", "lastName");
+        fieldsMapping.put("email", "email");
+        fieldsMapping.put(CREATED_AT, CREATED_AT);
+        fieldsMapping.put("document.documentExternalId", "document.documentExternalId");
+        fieldsMapping.put("document.type", "document.type");
+        fieldsMapping.put("document.number", "document.number");
+        return fieldsMapping;
+    }
 }

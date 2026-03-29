@@ -2,8 +2,10 @@ package br.com.gabrielferreira.users.domain.services;
 
 import br.com.gabrielferreira.users.domain.entities.DocumentEntity;
 import br.com.gabrielferreira.users.domain.entities.UserEntity;
+import br.com.gabrielferreira.users.domain.repositories.filter.user.UserFilter;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface UserService {
@@ -21,7 +23,7 @@ public interface UserService {
     UserEntity updatePassword(UUID userExternalId, String oldPassword,
                                                    String newPassword, UUID projectExternalId);
 
-    List<UserEntity> getAllUsers(UUID projectExternalId);
+    Page<UserEntity> getAllUsers(UUID projectExternalId, UserFilter userFilter, Pageable pageable);
 
     void delete(UUID userExternalId, UUID projectExternalId);
 }
