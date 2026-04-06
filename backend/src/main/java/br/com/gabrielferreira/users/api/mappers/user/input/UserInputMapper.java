@@ -13,9 +13,12 @@ import br.com.gabrielferreira.users.domain.repositories.filter.user.UserFilter;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
 public interface UserInputMapper {
+
+    UserInputMapper INSTANCE = Mappers.getMapper(UserInputMapper.class);
 
     @Mapping(target = "firstName", source = "firstName", qualifiedByName = "trimIfNotBlank")
     @Mapping(target = "lastName", source = "lastName", qualifiedByName = "trimIfNotBlank")
