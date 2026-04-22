@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
         ProjectEntity project = projectService.getOneProject(projectExternalId);
         userEntity.setProject(project);
 
-        validateExistingUserWithEmailAndProject(userEntity.getEmail(), projectExternalId);
+        validateExistingUserWithEmail(userEntity.getEmail(), projectExternalId, null);
         applyDefaultDocumentValues(userEntity);
 
         userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
@@ -86,14 +86,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserEntity updateEmail(UUID userExternalId, String newEmail, UUID projectExternalId) {
         UserEntity userFound = getOneUser(userExternalId, projectExternalId);
-        Optional<SummaryUserProjection> existingUserWithEmailAndProject = userRepository.findOneByEmailAndProjectExternalId(
-                newEmail,
-                projectExternalId
-        );
-
-        if (existingUserWithEmailAndProject.isPresent() && !Objects.equals(userFound.getUserExternalId(), existingUserWithEmailAndProject.get().getUserExternalId())) {
-            throw new BusinessRuleException("Already exists a user with this email in the project");
-        }
+        validateExistingUserWithEmail(newEmail, projectExternalId, userExternalId);
 
         userFound.setEmail(newEmail);
         return userRepository.save(userFound);
@@ -133,16 +126,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void validateExistingUserWithEmailAndProject(String email, UUID projectExternalId) {
-        Optional<SummaryUserProjection> existingUserWithEmailAndProject = userRepository.findOneByEmailAndProjectExternalId(
-                email,
-                projectExternalId
-        );
-        if (existingUserWithEmailAndProject.isPresent()) {
-            throw new BusinessRuleException("Already exists a user with this email in the project");
-        }
-    }
-
     private void validateExistingUserWithDocumentAndProject(DocumentEntity document, UUID projectExternalId) {
         Optional<SummaryUserProjection> existingUserWithDocumentAndProject = userRepository.findOneUserByDocumentAndProjectExternalId(
                 document.getType(),
@@ -168,5 +151,21 @@ public class UserServiceImpl implements UserService {
         if (Objects.nonNull(document) && StringUtils.isNotBlank(document.getNumber())) {
             throw new BusinessRuleException("User already has a document registered");
         }
+    }
+
+    private void validateExistingUserWithEmail(String email, UUID projectExternalId, UUID userExternalId) {
+        userRepository.findOneByEmailAndProjectExternalId(
+                email,
+                projectExternalId
+        ).ifPresent(user -> {
+            String templateErrorMessage = "Already exists a user with this email in the project";
+            if (Objects.isNull(userExternalId)) {
+                throw new BusinessRuleException(templateErrorMessage);
+            }
+
+            if (!Objects.equals(userExternalId, user.getUserExternalId())) {
+                throw new BusinessRuleException(templateErrorMessage);
+            }
+        });
     }
 }
