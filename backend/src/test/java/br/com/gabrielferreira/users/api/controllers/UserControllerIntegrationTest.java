@@ -1,11 +1,18 @@
 package br.com.gabrielferreira.users.api.controllers;
 
+import br.com.gabrielferreira.users.api.dtos.filter.document.DocumentFilterDTO;
+import br.com.gabrielferreira.users.api.dtos.filter.user.UserFilterDTO;
 import br.com.gabrielferreira.users.api.dtos.input.user.CreateUserInputDTO;
 import br.com.gabrielferreira.users.api.dtos.input.user.UpdateDocumentUserInputDTO;
 import br.com.gabrielferreira.users.api.dtos.input.user.UpdateEmailUserInputDTO;
+import br.com.gabrielferreira.users.api.dtos.input.user.UpdatePasswordUserInputDTO;
 import br.com.gabrielferreira.users.api.dtos.input.user.UpdateUserInputDTO;
 import br.com.gabrielferreira.users.core.utils.Mask;
+import br.com.gabrielferreira.users.domain.entities.DocumentEntity;
+import br.com.gabrielferreira.users.domain.entities.UserEntity;
 import br.com.gabrielferreira.users.domain.enums.DocumentType;
+import br.com.gabrielferreira.users.utils.GenerateCPFUtils;
+import com.jayway.jsonpath.JsonPath;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,9 +25,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -43,6 +53,8 @@ class UserControllerIntegrationTest extends BaseControllerIntegrationTest {
 
     private UUID userIdExistingWithoutDocument;
 
+    private UUID roleIdExisting;
+
     @BeforeEach
     void setUp() {
         userIdExisting = UUID.fromString("e83a7a62-d131-4644-b8c4-2d551d1e252c");
@@ -50,6 +62,7 @@ class UserControllerIntegrationTest extends BaseControllerIntegrationTest {
         projectIdExisting = UUID.fromString("baa79cdd-c3ec-4392-bf70-214d49a74218");
         projectIdNonExisting = UUID.fromString("1bc0212e-f9df-4a61-bc8c-6843d67f9bb7");
         userIdExistingWithoutDocument = UUID.fromString("d3629698-20fb-45eb-89f5-361bc449bc7d");
+        roleIdExisting = UUID.fromString("34fa7cf1-6b71-4989-bb92-f48068dc8967");
     }
 
     @Test
@@ -749,7 +762,317 @@ class UserControllerIntegrationTest extends BaseControllerIntegrationTest {
                 .andExpect(jsonPath("$.timestamp").isNotEmpty());
     }
 
-    // TODO: FAZER OS TESTES DO UPDATE PASSWORD, BUSCAR USUARIOS, DELETAR USUARIOS
+    @Test
+    @Order(28)
+    @SneakyThrows
+    void givenUserExternalIdExistingWithProjectExternalIdExistingWhenUpdatePasswordThenReturnUpdatedUser() {
+        var updatePasswordUserInputDTO = UpdatePasswordUserInputDTO.builder()
+                .newPassword("Ac12@")
+                .oldPassword("Ac1@")
+                .build();
+        String payload = objectMapper.writeValueAsString(updatePasswordUserInputDTO);
+
+        mockMvc.perform(put(URL.concat("/{userExternalId}/password"), userIdExisting)
+                        .content(payload)
+                        .header("projectExternalId", projectIdExisting)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.userExternalId").value(userIdExisting.toString()))
+                .andExpect(jsonPath("$.firstName").value("Gabriel"))
+                .andExpect(jsonPath("$.lastName").value("Ferreira"))
+                .andExpect(jsonPath("$.email").value("gabriel@email.com"))
+                .andExpect(jsonPath("$.createdAt").isNotEmpty())
+                .andExpect(jsonPath("$.document.documentExternalId").isNotEmpty())
+                .andExpect(jsonPath("$.document.type").value("CPF"))
+                .andExpect(jsonPath("$.document.number").value(Mask.formatDocument(DocumentType.CPF, "96742354771")));
+    }
+
+    @Test
+    @Order(29)
+    @SneakyThrows
+    void givenUserExternalIdExistingWithProjectExternalIdExistingWhenUpdatePasswordThenReturnOldPasswordDoesNotMatch() {
+        var updatePasswordUserInputDTO = UpdatePasswordUserInputDTO.builder()
+                .newPassword("Ac12@")
+                .oldPassword("Ac12@")
+                .build();
+        String payload = objectMapper.writeValueAsString(updatePasswordUserInputDTO);
+
+        mockMvc.perform(put(URL.concat("/{userExternalId}/password"), userIdExisting)
+                        .content(payload)
+                        .header("projectExternalId", projectIdExisting)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.title").value("Business Rule Violation"))
+                .andExpect(jsonPath("$.detail").value("Old password does not match"))
+                .andExpect(jsonPath("$.message").value("A business rule has been violated."))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+    @Test
+    @Order(30)
+    @SneakyThrows
+    void givenUserExternalIdExistingWithProjectExternalIdNonExistingWhenUpdatePasswordThenReturnNotFound() {
+        var updatePasswordUserInputDTO = UpdatePasswordUserInputDTO.builder()
+                .newPassword("Ac12@")
+                .oldPassword("Ac12@")
+                .build();
+        String payload = objectMapper.writeValueAsString(updatePasswordUserInputDTO);
+
+        mockMvc.perform(put(URL.concat("/{userExternalId}/password"), userIdExistingWithoutDocument)
+                        .content(payload)
+                        .header("projectExternalId", projectIdNonExisting)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON)
+                )
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.title").value("Resource Not Found"))
+                .andExpect(jsonPath("$.detail").value(String.format("User with ID %s not found for Project with ID %s", userIdExistingWithoutDocument, projectIdNonExisting)))
+                .andExpect(jsonPath("$.message").value("The requested resource could not be found."))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+    @Test
+    @Order(31)
+    @SneakyThrows
+    void givenUserExternalIdNonExistingWithProjectExternalIdExistingWhenUpdatePasswordThenReturnNotFound() {
+        var updatePasswordUserInputDTO = UpdatePasswordUserInputDTO.builder()
+                .newPassword("Ac12@")
+                .oldPassword("Ac12@")
+                .build();
+        String payload = objectMapper.writeValueAsString(updatePasswordUserInputDTO);
+
+        mockMvc.perform(put(URL.concat("/{userExternalId}/password"), userIdNonExisting)
+                        .content(payload)
+                        .header("projectExternalId", projectIdExisting)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON)
+                )
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.title").value("Resource Not Found"))
+                .andExpect(jsonPath("$.detail").value(String.format("User with ID %s not found for Project with ID %s", userIdNonExisting, projectIdExisting)))
+                .andExpect(jsonPath("$.message").value("The requested resource could not be found."))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+    @Test
+    @Order(32)
+    @SneakyThrows
+    void givenUserExternalIdNonExistingWithProjectExternalIdNonExistingWhenUpdatePasswordlThenReturnNotFound() {
+        var updatePasswordUserInputDTO = UpdatePasswordUserInputDTO.builder()
+                .newPassword("Ac12@")
+                .oldPassword("Ac12@")
+                .build();
+        String payload = objectMapper.writeValueAsString(updatePasswordUserInputDTO);
+
+        mockMvc.perform(put(URL.concat("/{userExternalId}/password"), userIdNonExisting)
+                        .content(payload)
+                        .header("projectExternalId", projectIdNonExisting)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON)
+                )
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.title").value("Resource Not Found"))
+                .andExpect(jsonPath("$.detail").value(String.format("User with ID %s not found for Project with ID %s", userIdNonExisting, projectIdNonExisting)))
+                .andExpect(jsonPath("$.message").value("The requested resource could not be found."))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidPasswords")
+    @Order(33)
+    @SneakyThrows
+    void givenUserExternalIdExistingWithProjectExternalIdExistingWhenUpdatePasswordThenNotSaveDueToInvalidPassword(String newPassword, String expectedErrorMessage) {
+        var updatePasswordUserInputDTO = UpdatePasswordUserInputDTO.builder()
+                .newPassword(newPassword)
+                .oldPassword("Ac12@")
+                .build();
+        String payload = objectMapper.writeValueAsString(updatePasswordUserInputDTO);
+
+        mockMvc.perform(put(URL.concat("/{userExternalId}/password"), userIdExisting)
+                        .content(payload)
+                        .header("projectExternalId", projectIdExisting)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.title").value("Invalid Data"))
+                .andExpect(jsonPath("$.detail").value("One or more fields are invalid. Please correct them and try again."))
+                .andExpect(jsonPath("$.message").value("One or more fields are invalid. Please correct them and try again."))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty())
+                .andExpect(jsonPath("$.fields").isArray())
+                .andExpect(jsonPath("$.fields[0].field").value("newPassword"))
+                .andExpect(jsonPath("$.fields[0].message").value(expectedErrorMessage));
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideInvalidUserInputsUpdatePassword")
+    @Order(34)
+    @SneakyThrows
+    void givenUserExternalIdExistingWithProjectExternalIdExistingWhenUpdatePasswordThenThenReturnValidationError(
+            UpdatePasswordUserInputDTO updatePasswordUserInputDTO,
+            String expectedErrorMessage,
+            String field
+    ) {
+
+        String payload = objectMapper.writeValueAsString(updatePasswordUserInputDTO);
+
+        mockMvc.perform(put(URL.concat("/{userExternalId}/password"), userIdExisting)
+                        .content(payload)
+                        .header("projectExternalId", projectIdExisting)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.title").value("Invalid Data"))
+                .andExpect(jsonPath("$.detail").value("One or more fields are invalid. Please correct them and try again."))
+                .andExpect(jsonPath("$.message").value("One or more fields are invalid. Please correct them and try again."))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty())
+                .andExpect(jsonPath("$.fields").isArray())
+                .andExpect(jsonPath("$.fields[0].field").value(field))
+                .andExpect(jsonPath("$.fields[0].message").value(expectedErrorMessage));
+    }
+
+    @Test
+    @Order(35)
+    @SneakyThrows
+    void givenUserFilterDtoWhenListAllThenReturnUser() {
+        // Create another user
+        UserEntity userEntity = UserEntity.builder()
+                .firstName("Integration")
+                .lastName("Test")
+                .email("integrationtest@email.com")
+                .password("$2a$10$oYelCMPRK3v13DgtQhnGXOJjC2ZTa7bUUBfGv2cSxJbZSIb4gknYm")
+                .roles(
+                        List.of(
+                                roleRepository.findOneByRoleExternalIdAndProjectExternalId(
+                                        roleIdExisting, projectIdExisting
+                                ).orElseThrow()
+                        )
+                )
+                .project(
+                        projectRepository.findOneByProjectExternalId(projectIdExisting)
+                                .orElseThrow()
+                )
+                .document(
+                        DocumentEntity.builder()
+                                .type(DocumentType.CPF)
+                                .number(GenerateCPFUtils.generateCPF())
+                                .build()
+                )
+                .build();
+        userRepository.saveAndFlush(userEntity);
+
+
+        UserFilterDTO userFilterDTO = UserFilterDTO.builder()
+                .userExternalId(userEntity.getUserExternalId())
+                .firstName(userEntity.getFirstName())
+                .lastName(userEntity.getLastName())
+                .email(userEntity.getEmail())
+                .createdAtFrom(userEntity.getCreatedAt())
+                .createdAtFrom(userEntity.getCreatedAt())
+                .document(
+                        DocumentFilterDTO.builder()
+                                .type(userEntity.getDocument().getType().toString())
+                                .number(userEntity.getDocument().getNumber())
+                                .build()
+                )
+                .build();
+
+        String payload = objectMapper.writeValueAsString(userFilterDTO);
+
+        String url = URL.concat("/search?sort=createdAt,DESC");
+        mockMvc.perform(post(url)
+                        .header("projectExternalId", projectIdExisting)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON)
+                        .content(payload)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].userExternalId").value(userEntity.getUserExternalId().toString()))
+                .andExpect(jsonPath("$.content[0].firstName").value(userEntity.getFirstName()))
+                .andExpect(jsonPath("$.content[0].lastName").value(userEntity.getLastName()))
+                .andExpect(jsonPath("$.content[0].email").value(userEntity.getEmail()))
+                .andExpect(jsonPath("$.content[0].document.documentExternalId").value(userEntity.getDocument().getDocumentExternalId().toString()))
+                .andExpect(jsonPath("$.content[0].document.type").value(userEntity.getDocument().getType().toString()))
+                .andExpect(jsonPath("$.content[0].document.number").value(Mask.formatDocument(
+                        userEntity.getDocument().getType(),
+                        userEntity.getDocument().getNumber())
+                ))
+                .andExpect(result -> {
+                    String json = result.getResponse().getContentAsString();
+
+                    String jsonDate = JsonPath.read(json, "$.content[0].createdAt");
+                    OffsetDateTime actual = OffsetDateTime.parse(jsonDate);
+
+                    assertEquals(userEntity.getCreatedAt(), actual);
+                })
+                .andExpect(jsonPath("$.size").value(5))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.number").value(0));
+    }
+
+    @Test
+    @Order(35)
+    @SneakyThrows
+    void givenUserFilterDtoWhenListAllThenReturnEmptyList() {
+        UserFilterDTO userFilterDTO = UserFilterDTO.builder()
+                .build();
+        String payload = objectMapper.writeValueAsString(userFilterDTO);
+
+        String url = URL.concat("/search?sort=createdAt,DESC");
+        mockMvc.perform(post(url)
+                        .header("projectExternalId", projectIdNonExisting)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON)
+                        .content(payload)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content").isEmpty())
+                .andExpect(jsonPath("$.size").value(5))
+                .andExpect(jsonPath("$.totalElements").value(0))
+                .andExpect(jsonPath("$.totalPages").value(0))
+                .andExpect(jsonPath("$.number").value(0));
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideInvalidUserFilter")
+    @Order(36)
+    @SneakyThrows
+    void givenUserFilterDtoWhenListAllThenReturnValidationError(UserFilterDTO userFilterDTO, String expectedErrorMessage, String field) {
+        String payload = objectMapper.writeValueAsString(userFilterDTO);
+
+        String url = URL.concat("/search?sort=createdAt,DESC");
+        mockMvc.perform(post(url)
+                        .header("projectExternalId", projectIdNonExisting)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON)
+                        .content(payload)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.title").value("Invalid Data"))
+                .andExpect(jsonPath("$.detail").value("One or more fields are invalid. Please correct them and try again."))
+                .andExpect(jsonPath("$.message").value("One or more fields are invalid. Please correct them and try again."))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty())
+                .andExpect(jsonPath("$.fields").isArray())
+                .andExpect(jsonPath("$.fields[0].field").value(field))
+                .andExpect(jsonPath("$.fields[0].message").value(expectedErrorMessage));
+    }
+
+    // TODO: fazer a busca de documentos por tipos
+    // TODO: fazer os testes do delete do usuario
 
     public static Stream<Arguments> provideInvalidDocument() {
         String expectedErrorMessageInvalidDocument = "Invalid CPF number.";
@@ -894,6 +1217,98 @@ class UserControllerIntegrationTest extends BaseControllerIntegrationTest {
                 Arguments.of(".teste@email.com"),
                 Arguments.of("teste.@email.com"),
                 Arguments.of("teste..email@email.com")
+        );
+    }
+
+    public static Stream<Arguments> provideInvalidUserInputsUpdatePassword() {
+        var userWithoutNewPassword = UpdatePasswordUserInputDTO.builder()
+                .newPassword(null)
+                .oldPassword("Ac1@")
+                .build();
+
+        var userExceededLimitNewPassword = UpdatePasswordUserInputDTO.builder()
+                .newPassword("Ac1@" + RandomStringUtils.secure().nextAlphabetic(256))
+                .oldPassword("Doe")
+                .build();
+
+        var userWithoutOldPassword = UpdatePasswordUserInputDTO.builder()
+                .newPassword("Ac1@")
+                .oldPassword(null)
+                .build();
+
+        var userExceededLimitOldPassword= UpdatePasswordUserInputDTO.builder()
+                .newPassword("Ac1@")
+                .oldPassword(RandomStringUtils.secure().nextAlphabetic(256))
+                .build();
+
+        return Stream.of(
+                Arguments.of(userWithoutNewPassword, "New password of the user is required", "newPassword"),
+                Arguments.of(userExceededLimitNewPassword, "New password of the user must be between 1 and 255 characters long", "newPassword"),
+                Arguments.of(userWithoutOldPassword, "Old password of the user is required", "oldPassword"),
+                Arguments.of(userExceededLimitOldPassword, "Old password of the user must be between 1 and 255 characters long", "oldPassword")
+        );
+    }
+
+    public static Stream<Arguments> provideInvalidUserFilter() {
+        DocumentFilterDTO documentWithoutType = DocumentFilterDTO.builder()
+                .number(GenerateCPFUtils.generateCPF())
+                .build();
+
+        DocumentFilterDTO documentWithoutNumber = DocumentFilterDTO.builder()
+                .type("CPF")
+                .build();
+
+        DocumentFilterDTO documentWithInvalidType = DocumentFilterDTO.builder()
+                .type("TEST")
+                .number("123")
+                .build();
+
+        DocumentFilterDTO documentWithTypeCpfInvalidNumber = DocumentFilterDTO.builder()
+                .type("CPF")
+                .number("111.222.333-44")
+                .build();
+
+        DocumentFilterDTO documentWithSequenceDigital = DocumentFilterDTO.builder()
+                .type("CPF")
+                .number("111.111.111-11")
+                .build();
+
+        return Stream.of(
+                Arguments.of(
+                        UserFilterDTO.builder()
+                                .document(documentWithoutType)
+                                .build(),
+                        "Document type of the user cannot be null",
+                        "document.type"
+                ),
+                Arguments.of(
+                        UserFilterDTO.builder()
+                                .document(documentWithoutNumber)
+                                .build(),
+                        "Document number of the user is required",
+                        "document.number"
+                ),
+                Arguments.of(
+                        UserFilterDTO.builder()
+                                .document(documentWithInvalidType)
+                                .build(),
+                        "Invalid document type. Allowed values are: [CPF, CNPJ, NONE]",
+                        "document.type"
+                ),
+                Arguments.of(
+                        UserFilterDTO.builder()
+                                .document(documentWithTypeCpfInvalidNumber)
+                                .build(),
+                        "Invalid CPF number.",
+                        "document.number"
+                ),
+                Arguments.of(
+                        UserFilterDTO.builder()
+                                .document(documentWithSequenceDigital)
+                                .build(),
+                        "CPF number cannot be sequential digits.",
+                        "document.number"
+                )
         );
     }
 }
