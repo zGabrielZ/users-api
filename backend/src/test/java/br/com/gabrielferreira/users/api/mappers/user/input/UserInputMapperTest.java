@@ -86,7 +86,7 @@ class UserInputMapperTest {
                 .createdAtTo(OffsetDateTime.now().plusDays(1))
                 .document(
                         DocumentFilterDTO.builder()
-                                .type("CPF")
+                                .type(DocumentType.CPF)
                                 .number(GenerateCPFUtils.generateCPF())
                                 .build()
                 )
@@ -101,7 +101,7 @@ class UserInputMapperTest {
         assertEquals(userFilterDTO.createdAtFrom(), result.createdAtFrom());
         assertEquals(userFilterDTO.createdAtTo(), result.createdAtTo());
         assertNotNull(result.document());
-        assertEquals(userFilterDTO.document().type(), result.document().type().name());
+        assertEquals(userFilterDTO.document().type(), result.document().type());
         assertEquals(userFilterDTO.document().number(), result.document().number());
     }
 
@@ -109,13 +109,13 @@ class UserInputMapperTest {
     @Order(5)
     void givenDocumentFilterWhenToDocumentFilterThenReturnDocumentFilterCreated() {
         DocumentFilterDTO documentFilterDTO = DocumentFilterDTO.builder()
-                .type("CPF")
+                .type(DocumentType.CPF)
                 .number(GenerateCPFUtils.generateCPF())
                 .build();
 
         DocumentFilter result = mapper.mapDocumentFilter(documentFilterDTO);
         assertNotNull(result);
-        assertEquals(documentFilterDTO.type(), result.type().name());
+        assertEquals(documentFilterDTO.type(), result.type());
         assertEquals(documentFilterDTO.number(), result.number());
     }
 }

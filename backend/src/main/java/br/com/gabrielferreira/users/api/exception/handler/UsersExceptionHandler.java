@@ -40,6 +40,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -347,6 +348,10 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
             @NonNull WebRequest request
     ) {
         if (Objects.nonNull(ex.getCause()) && ex.getCause() instanceof InvalidFormatException invalidFormatException) {
+            if (invalidFormatException.getTargetType().isEnum()) {
+                return handleInvalidFormatEnumException(invalidFormatException, headers, status, request);
+            }
+
             return handleInvalidFormatException(invalidFormatException, headers, status, request);
         }
 
@@ -387,6 +392,26 @@ public class UsersExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getValue(),
                 ex.getTargetType().getSimpleName()
         );
+        ProblemDetailDTO problemDetailDto = createProblemDetailDto(
+                httpStatus,
+                problemDetailType,
+                detail,
+                null
+        );
+        return handleExceptionInternal(ex, problemDetailDto, headers, httpStatus, request);
+    }
+
+    private ResponseEntity<Object> handleInvalidFormatEnumException(InvalidFormatException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        HttpStatus httpStatus = HttpStatus.valueOf(status.value());
+        ProblemDetailType problemDetailType = ProblemDetailType.MALFORMED_REQUEST;
+        String allowedValues = Arrays.stream(ex.getTargetType().getEnumConstants())
+                .map(Object::toString)
+                .collect(Collectors.joining(", "));
+        String detail = String.format("The property '%s' received the value '%s', which is of an invalid type. Allowed values: '%s' ",
+                getPath(ex.getPath()),
+                ex.getValue(),
+                allowedValues
+                );
         ProblemDetailDTO problemDetailDto = createProblemDetailDto(
                 httpStatus,
                 problemDetailType,

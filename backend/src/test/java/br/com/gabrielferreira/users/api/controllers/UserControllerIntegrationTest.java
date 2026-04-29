@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.OffsetDateTime;
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -947,31 +947,14 @@ class UserControllerIntegrationTest extends BaseControllerIntegrationTest {
     @SneakyThrows
     void givenUserFilterDtoWhenListAllThenReturnUser() {
         // Create another user
-        UserEntity userEntity = UserEntity.builder()
-                .firstName("Integration")
-                .lastName("Test")
-                .email("integrationtest@email.com")
-                .password("$2a$10$oYelCMPRK3v13DgtQhnGXOJjC2ZTa7bUUBfGv2cSxJbZSIb4gknYm")
-                .roles(
-                        List.of(
-                                roleRepository.findOneByRoleExternalIdAndProjectExternalId(
-                                        roleIdExisting, projectIdExisting
-                                ).orElseThrow()
-                        )
-                )
-                .project(
-                        projectRepository.findOneByProjectExternalId(projectIdExisting)
-                                .orElseThrow()
-                )
-                .document(
-                        DocumentEntity.builder()
-                                .type(DocumentType.CPF)
-                                .number(GenerateCPFUtils.generateCPF())
-                                .build()
-                )
-                .build();
-        userRepository.saveAndFlush(userEntity);
-
+        UserEntity userEntity = createUser(
+                DocumentEntity.builder()
+                        .type(DocumentType.CPF)
+                        .number(GenerateCPFUtils.generateCPF())
+                        .build(),
+                roleIdExisting,
+                projectIdExisting
+        );
 
         UserFilterDTO userFilterDTO = UserFilterDTO.builder()
                 .userExternalId(userEntity.getUserExternalId())
@@ -982,7 +965,7 @@ class UserControllerIntegrationTest extends BaseControllerIntegrationTest {
                 .createdAtFrom(userEntity.getCreatedAt())
                 .document(
                         DocumentFilterDTO.builder()
-                                .type(userEntity.getDocument().getType().toString())
+                                .type(userEntity.getDocument().getType())
                                 .number(userEntity.getDocument().getNumber())
                                 .build()
                 )
@@ -1071,7 +1054,96 @@ class UserControllerIntegrationTest extends BaseControllerIntegrationTest {
                 .andExpect(jsonPath("$.fields[0].message").value(expectedErrorMessage));
     }
 
-    // TODO: fazer a busca de documentos por tipos
+    @Test
+    @Order(37)
+    @SneakyThrows
+    void givenUserFilterDtoWhenListAllThenReturnValidationErrorInvalidDocumentType() {
+        Map<String, Object> payloadMap = Map.of(
+                "document", Map.of(
+                        "type", "TEST"
+                )
+        );
+        String payload = objectMapper.writeValueAsString(payloadMap);
+
+        String url = URL.concat("/search?sort=createdAt,DESC");
+        mockMvc.perform(post(url)
+                        .header("projectExternalId", projectIdNonExisting)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON)
+                        .content(payload)
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.title").value("Malformed Request"))
+                .andExpect(jsonPath("$.detail").value("The property 'document.type' received the value 'TEST', which is of an invalid type. Allowed values: 'CPF, CNPJ, NONE' "))
+                .andExpect(jsonPath("$.message").value("The request body is malformed and cannot be processed."))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+    // TODO: fazer a busca por tipo de documento
+//    @Test
+//    @Order(38)
+//    @SneakyThrows
+//    void givenUserFilterDtoWhenListAllThenReturnUserWithoutDocument() {
+//        // Create another user
+//        UserEntity userEntity = createUser(
+//                DocumentEntity.builder()
+//                        .type(DocumentType.NONE)
+//                        .build(),
+//                roleIdExisting,
+//                projectIdExisting
+//        );
+//
+//        UserFilterDTO userFilterDTO = UserFilterDTO.builder()
+//                .userExternalId(userEntity.getUserExternalId())
+//                .firstName(userEntity.getFirstName())
+//                .lastName(userEntity.getLastName())
+//                .email(userEntity.getEmail())
+//                .createdAtFrom(userEntity.getCreatedAt())
+//                .createdAtFrom(userEntity.getCreatedAt())
+//                .document(
+//                        DocumentFilterDTO.builder()
+//                                .type(userEntity.getDocument().getType().toString())
+//                                .number(userEntity.getDocument().getNumber())
+//                                .build()
+//                )
+//                .build();
+//
+//        String payload = objectMapper.writeValueAsString(userFilterDTO);
+//
+//        String url = URL.concat("/search?sort=createdAt,DESC");
+//        mockMvc.perform(post(url)
+//                        .header("projectExternalId", projectIdExisting)
+//                        .contentType(MEDIA_TYPE_JSON)
+//                        .accept(MEDIA_TYPE_JSON)
+//                        .content(payload)
+//                )
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.content[0].userExternalId").value(userEntity.getUserExternalId().toString()))
+//                .andExpect(jsonPath("$.content[0].firstName").value(userEntity.getFirstName()))
+//                .andExpect(jsonPath("$.content[0].lastName").value(userEntity.getLastName()))
+//                .andExpect(jsonPath("$.content[0].email").value(userEntity.getEmail()))
+//                .andExpect(jsonPath("$.content[0].document.documentExternalId").value(userEntity.getDocument().getDocumentExternalId().toString()))
+//                .andExpect(jsonPath("$.content[0].document.type").value(userEntity.getDocument().getType().toString()))
+//                .andExpect(jsonPath("$.content[0].document.number").value(Mask.formatDocument(
+//                        userEntity.getDocument().getType(),
+//                        userEntity.getDocument().getNumber())
+//                ))
+//                .andExpect(result -> {
+//                    String json = result.getResponse().getContentAsString();
+//
+//                    String jsonDate = JsonPath.read(json, "$.content[0].createdAt");
+//                    OffsetDateTime actual = OffsetDateTime.parse(jsonDate);
+//
+//                    assertEquals(userEntity.getCreatedAt(), actual);
+//                })
+//                .andExpect(jsonPath("$.size").value(5))
+//                .andExpect(jsonPath("$.totalElements").value(1))
+//                .andExpect(jsonPath("$.totalPages").value(1))
+//                .andExpect(jsonPath("$.number").value(0));
+//    }
+
+
     // TODO: fazer os testes do delete do usuario
 
     public static Stream<Arguments> provideInvalidDocument() {
@@ -1255,21 +1327,16 @@ class UserControllerIntegrationTest extends BaseControllerIntegrationTest {
                 .build();
 
         DocumentFilterDTO documentWithoutNumber = DocumentFilterDTO.builder()
-                .type("CPF")
-                .build();
-
-        DocumentFilterDTO documentWithInvalidType = DocumentFilterDTO.builder()
-                .type("TEST")
-                .number("123")
+                .type(DocumentType.CPF)
                 .build();
 
         DocumentFilterDTO documentWithTypeCpfInvalidNumber = DocumentFilterDTO.builder()
-                .type("CPF")
+                .type(DocumentType.CPF)
                 .number("111.222.333-44")
                 .build();
 
         DocumentFilterDTO documentWithSequenceDigital = DocumentFilterDTO.builder()
-                .type("CPF")
+                .type(DocumentType.CPF)
                 .number("111.111.111-11")
                 .build();
 
@@ -1287,13 +1354,6 @@ class UserControllerIntegrationTest extends BaseControllerIntegrationTest {
                                 .build(),
                         "Document number of the user is required",
                         "document.number"
-                ),
-                Arguments.of(
-                        UserFilterDTO.builder()
-                                .document(documentWithInvalidType)
-                                .build(),
-                        "Invalid document type. Allowed values are: [CPF, CNPJ, NONE]",
-                        "document.type"
                 ),
                 Arguments.of(
                         UserFilterDTO.builder()

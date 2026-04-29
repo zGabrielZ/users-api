@@ -1,21 +1,19 @@
 package br.com.gabrielferreira.users.api.dtos.filter.document;
 
 import br.com.gabrielferreira.users.core.validations.document.ValidDocument;
-import br.com.gabrielferreira.users.core.validations.document.type.ValidDocumentType;
 import br.com.gabrielferreira.users.domain.enums.DocumentType;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
-@ValidDocument(number = "number", type = "documentType", property = "number")
+// TODO: Criar uma outra validação de acordo com o number, se o tipo for none, entao o number nao deve informar, se for outro tipo e o number for nulo, deve preencher o campo
+@ValidDocument(number = "number", type = "type", property = "number")
 public record DocumentFilterDTO(
         @Schema(
                 description = """
@@ -25,8 +23,7 @@ public record DocumentFilterDTO(
                 example = "CPF"
         )
         @NotNull
-        @ValidDocumentType
-        String type,
+        DocumentType type,
 
         @Schema(
                 description = """
@@ -42,11 +39,4 @@ public record DocumentFilterDTO(
         String number
 ) implements Serializable {
 
-        @JsonIgnore
-        public DocumentType getDocumentType() {
-                if (StringUtils.isNotBlank(this.type)) {
-                        return DocumentType.valueOf(type);
-                }
-                return null;
-        }
 }

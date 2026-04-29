@@ -3,10 +3,11 @@ package br.com.gabrielferreira.users.api.controllers;
 import br.com.gabrielferreira.users.api.dtos.filter.role.RoleFilterDTO;
 import br.com.gabrielferreira.users.api.dtos.input.role.CreateRoleInputDTO;
 import br.com.gabrielferreira.users.api.dtos.input.role.UpdateRoleInputDTO;
+import br.com.gabrielferreira.users.domain.entities.DocumentEntity;
 import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
 import br.com.gabrielferreira.users.domain.entities.RoleEntity;
-import br.com.gabrielferreira.users.domain.entities.UserEntity;
-import br.com.gabrielferreira.users.stub.user.UserEntityStub;
+import br.com.gabrielferreira.users.domain.enums.DocumentType;
+import br.com.gabrielferreira.users.utils.GenerateCPFUtils;
 import com.jayway.jsonpath.JsonPath;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -359,12 +359,11 @@ class RoleControllerIntegrationTest extends BaseControllerIntegrationTest {
         // Create another role with authority ROLE_USER to make the update fail due to existing authority in the same project
         ProjectEntity expectedProjectFound = projectRepository.findOneByProjectExternalId(projectIdExisting)
                 .orElseThrow();
-        RoleEntity roleEntity = RoleEntity.builder()
-                .description("Test")
-                .authority("ROLE_TEST")
-                .project(expectedProjectFound)
-                .build();
-        roleEntity = roleRepository.saveAndFlush(roleEntity);
+        RoleEntity roleEntity = createRole(
+                "Test",
+                "ROLE_TEST",
+                expectedProjectFound
+        );
 
         var updateRoleInputDTO = CreateRoleInputDTO.builder()
                 .description("Administrator updated")
@@ -551,24 +550,24 @@ class RoleControllerIntegrationTest extends BaseControllerIntegrationTest {
     @SneakyThrows
     void givenRoleExternalIdWithProjectExternalIdExistingWhenDeleteThenThrowDueToRoleInUse() {
         // Create another project and user to associate with the existing project to make it in use
-        ProjectEntity projectEntity = ProjectEntity.builder()
-                .name("Project C")
-                .build();
-        projectEntity = projectRepository.saveAndFlush(projectEntity);
+        ProjectEntity projectEntity = createProject("Project C");
 
         // Create another role for the existing project to make it in use
-        RoleEntity roleEntity = RoleEntity.builder()
-                .description("Test")
-                .authority("ROLE_TEST")
-                .project(projectEntity)
-                .build();
-        roleEntity = roleRepository.saveAndFlush(roleEntity);
+        RoleEntity roleEntity = createRole(
+                "Test",
+                "ROLE_TEST",
+                projectEntity
+        );
 
         // Associate the user with the existing project to make it in use
-        UserEntity userEntity = UserEntityStub.createUserEntity(projectEntity);
-        userEntity.setRoles(new ArrayList<>());
-        userEntity.getRoles().add(roleEntity);
-        userRepository.saveAndFlush(userEntity);
+        createUser(
+                DocumentEntity.builder()
+                        .type(DocumentType.CPF)
+                        .number(GenerateCPFUtils.generateCPF())
+                        .build(),
+                roleEntity.getRoleExternalId(),
+                projectEntity.getProjectExternalId()
+        );
 
         mockMvc.perform(delete(URL.concat("/{roleExternalId}"), roleEntity.getRoleExternalId())
                         .header("projectExternalId", projectEntity.getProjectExternalId())
@@ -588,19 +587,15 @@ class RoleControllerIntegrationTest extends BaseControllerIntegrationTest {
     @SneakyThrows
     void givenRoleFilterDtoWhenListAllThenReturnRole() {
         // Create another project and user to associate with the existing project to make it in use
-        ProjectEntity projectEntity = ProjectEntity.builder()
-                .name("Project C")
-                .build();
-        projectEntity = projectRepository.saveAndFlush(projectEntity);
+        ProjectEntity projectEntity = createProject("Project C");
         OffsetDateTime expectedCreatedAtProject = projectEntity.getCreatedAt();
 
         // Create another role for the existing project to make it in use
-        RoleEntity roleEntity = RoleEntity.builder()
-                .description("Test")
-                .authority("ROLE_TEST")
-                .project(projectEntity)
-                .build();
-        roleEntity = roleRepository.saveAndFlush(roleEntity);
+        RoleEntity roleEntity = createRole(
+                "Test",
+                "ROLE_TEST",
+                projectEntity
+        );
         OffsetDateTime expectedCreatedAtRole = roleEntity.getCreatedAt();
 
         var roleFilterDTO = RoleFilterDTO.builder()

@@ -208,10 +208,7 @@ class ProjectControllerIntegrationTest extends BaseControllerIntegrationTest {
     @SneakyThrows
     void givenPayloadProjectWithProjectExternalIdExistingWhenUpdateThenReturnNotSaveDueToExistingName() {
         // Create another project with name "Project B" to test the update with existing name
-        ProjectEntity projectEntity = ProjectEntity.builder()
-                .name("Project C")
-                .build();
-        projectEntity = projectRepository.saveAndFlush(projectEntity);
+        ProjectEntity projectEntity = createProject("Project C");
 
         UpdateProjectInputDTO updateProjectInputDTO = UpdateProjectInputDTO.builder()
                 .name("Project A")
@@ -310,10 +307,7 @@ class ProjectControllerIntegrationTest extends BaseControllerIntegrationTest {
     @SneakyThrows
     void givenProjectExternalIdExistingWhenDeleteThenThrowDueToProjectInUse() {
         // Create another project and user to associate with the existing project to make it in use
-        ProjectEntity projectEntity = ProjectEntity.builder()
-                .name("Project C")
-                .build();
-        projectEntity = projectRepository.saveAndFlush(projectEntity);
+        ProjectEntity projectEntity = createProject("Project C");
 
         // Associate the user with the existing project to make it in use
         UserEntity userEntity = UserEntityStub.createUserEntity(projectEntity);
@@ -335,10 +329,7 @@ class ProjectControllerIntegrationTest extends BaseControllerIntegrationTest {
     @Order(14)
     @SneakyThrows
     void givenProjectFilterDtoWhenListAllThenReturnProject() {
-        ProjectEntity projectEntity = ProjectEntity.builder()
-                .name("Project C")
-                .build();
-        projectEntity = projectRepository.saveAndFlush(projectEntity);
+        ProjectEntity projectEntity = createProject("Project C");
         OffsetDateTime expectedCreatedAt = projectEntity.getCreatedAt();
 
         var projectFilterDTO = ProjectFilterDTO.builder()
