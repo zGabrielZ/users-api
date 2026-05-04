@@ -1,4 +1,4 @@
-package br.com.gabrielferreira.users.infrastructure.config;
+package br.com.gabrielferreira.users.infrastructure.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

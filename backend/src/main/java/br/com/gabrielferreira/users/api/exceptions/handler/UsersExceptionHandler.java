@@ -1,9 +1,9 @@
-package br.com.gabrielferreira.users.api.exception.handler;
+package br.com.gabrielferreira.users.api.exceptions.handler;
 
-import br.com.gabrielferreira.users.api.exception.dtos.ProblemDetailDTO;
-import br.com.gabrielferreira.users.api.exception.dtos.ProblemDetailFieldDTO;
-import br.com.gabrielferreira.users.api.exception.enums.ProblemDetailType;
-import br.com.gabrielferreira.users.api.exception.mappers.ProblemDetailMapper;
+import br.com.gabrielferreira.users.api.exceptions.dtos.ProblemDetailDTO;
+import br.com.gabrielferreira.users.api.exceptions.dtos.ProblemDetailFieldDTO;
+import br.com.gabrielferreira.users.api.exceptions.enums.ProblemDetailType;
+import br.com.gabrielferreira.users.api.exceptions.mappers.ProblemDetailMapper;
 import br.com.gabrielferreira.users.domain.exceptions.BusinessRuleException;
 import br.com.gabrielferreira.users.domain.exceptions.EntityInUseException;
 import br.com.gabrielferreira.users.domain.exceptions.EntityNotFoundException;

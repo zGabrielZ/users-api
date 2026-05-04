@@ -1,4 +1,4 @@
-package br.com.gabrielferreira.users.api.exception.dtos;
+package br.com.gabrielferreira.users.api.exceptions.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;

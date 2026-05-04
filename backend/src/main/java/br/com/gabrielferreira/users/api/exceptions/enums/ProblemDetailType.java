@@ -1,4 +1,4 @@
-package br.com.gabrielferreira.users.api.exception.enums;
+package br.com.gabrielferreira.users.api.exceptions.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,7 +1,7 @@
-package br.com.gabrielferreira.users.api.exception.mappers;
+package br.com.gabrielferreira.users.api.exceptions.mappers;
 
-import br.com.gabrielferreira.users.api.exception.dtos.ProblemDetailDTO;
-import br.com.gabrielferreira.users.api.exception.dtos.ProblemDetailFieldDTO;
+import br.com.gabrielferreira.users.api.exceptions.dtos.ProblemDetailDTO;
+import br.com.gabrielferreira.users.api.exceptions.dtos.ProblemDetailFieldDTO;
 import org.mapstruct.Mapper;
 
 import java.time.OffsetDateTime;
