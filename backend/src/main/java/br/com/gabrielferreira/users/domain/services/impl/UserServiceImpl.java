@@ -6,6 +6,7 @@ import br.com.gabrielferreira.users.domain.entities.ProjectEntity;
 import br.com.gabrielferreira.users.domain.entities.UserEntity;
 import br.com.gabrielferreira.users.domain.enums.DocumentType;
 import br.com.gabrielferreira.users.domain.exceptions.BusinessRuleException;
+import br.com.gabrielferreira.users.domain.exceptions.EntityInUseException;
 import br.com.gabrielferreira.users.domain.exceptions.UserNotFoundException;
 import br.com.gabrielferreira.users.domain.repositories.UserRepository;
 import br.com.gabrielferreira.users.domain.repositories.filter.user.UserFilter;
@@ -122,7 +123,7 @@ public class UserServiceImpl implements UserService {
             userRepository.delete(userFound);
             userRepository.flush();
         } catch (DataIntegrityViolationException e) {
-            throw new BusinessRuleException(String.format("User with ID %s cannot be removed as it is in use.", userExternalId));
+            throw new EntityInUseException(String.format("User with ID %s cannot be removed as it is in use.", userExternalId));
         }
     }
 

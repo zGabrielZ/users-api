@@ -1,10 +1,10 @@
 package br.com.gabrielferreira.users.api.dtos.filter.document;
 
 import br.com.gabrielferreira.users.core.validations.document.ValidDocument;
+import br.com.gabrielferreira.users.core.validations.document.ValidDocumentTypeNumber;
 import br.com.gabrielferreira.users.domain.enums.DocumentType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
@@ -12,7 +12,7 @@ import java.io.Serializable;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
-// TODO: Criar uma outra validação de acordo com o number, se o tipo for none, entao o number nao deve informar, se for outro tipo e o number for nulo, deve preencher o campo
+@ValidDocumentTypeNumber(number = "number", type = "type", property = "number")
 @ValidDocument(number = "number", type = "type", property = "number")
 public record DocumentFilterDTO(
         @Schema(
@@ -35,7 +35,6 @@ public record DocumentFilterDTO(
                         """,
                 example = "123.456.789-00"
         )
-        @NotBlank
         String number
 ) implements Serializable {
 

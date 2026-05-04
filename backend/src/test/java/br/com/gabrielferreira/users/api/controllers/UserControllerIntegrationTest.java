@@ -8,9 +8,11 @@ import br.com.gabrielferreira.users.api.dtos.input.user.UpdateEmailUserInputDTO;
 import br.com.gabrielferreira.users.api.dtos.input.user.UpdatePasswordUserInputDTO;
 import br.com.gabrielferreira.users.api.dtos.input.user.UpdateUserInputDTO;
 import br.com.gabrielferreira.users.core.utils.Mask;
+import br.com.gabrielferreira.users.domain.entities.CompanyEntity;
 import br.com.gabrielferreira.users.domain.entities.DocumentEntity;
 import br.com.gabrielferreira.users.domain.entities.UserEntity;
 import br.com.gabrielferreira.users.domain.enums.DocumentType;
+import br.com.gabrielferreira.users.utils.GenerateCNPJUtils;
 import br.com.gabrielferreira.users.utils.GenerateCPFUtils;
 import com.jayway.jsonpath.JsonPath;
 import lombok.SneakyThrows;
@@ -31,6 +33,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -1080,71 +1083,161 @@ class UserControllerIntegrationTest extends BaseControllerIntegrationTest {
                 .andExpect(jsonPath("$.timestamp").isNotEmpty());
     }
 
-    // TODO: fazer a busca por tipo de documento
-//    @Test
-//    @Order(38)
-//    @SneakyThrows
-//    void givenUserFilterDtoWhenListAllThenReturnUserWithoutDocument() {
-//        // Create another user
-//        UserEntity userEntity = createUser(
-//                DocumentEntity.builder()
-//                        .type(DocumentType.NONE)
-//                        .build(),
-//                roleIdExisting,
-//                projectIdExisting
-//        );
-//
-//        UserFilterDTO userFilterDTO = UserFilterDTO.builder()
-//                .userExternalId(userEntity.getUserExternalId())
-//                .firstName(userEntity.getFirstName())
-//                .lastName(userEntity.getLastName())
-//                .email(userEntity.getEmail())
-//                .createdAtFrom(userEntity.getCreatedAt())
-//                .createdAtFrom(userEntity.getCreatedAt())
-//                .document(
-//                        DocumentFilterDTO.builder()
-//                                .type(userEntity.getDocument().getType().toString())
-//                                .number(userEntity.getDocument().getNumber())
-//                                .build()
-//                )
-//                .build();
-//
-//        String payload = objectMapper.writeValueAsString(userFilterDTO);
-//
-//        String url = URL.concat("/search?sort=createdAt,DESC");
-//        mockMvc.perform(post(url)
-//                        .header("projectExternalId", projectIdExisting)
-//                        .contentType(MEDIA_TYPE_JSON)
-//                        .accept(MEDIA_TYPE_JSON)
-//                        .content(payload)
-//                )
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.content[0].userExternalId").value(userEntity.getUserExternalId().toString()))
-//                .andExpect(jsonPath("$.content[0].firstName").value(userEntity.getFirstName()))
-//                .andExpect(jsonPath("$.content[0].lastName").value(userEntity.getLastName()))
-//                .andExpect(jsonPath("$.content[0].email").value(userEntity.getEmail()))
-//                .andExpect(jsonPath("$.content[0].document.documentExternalId").value(userEntity.getDocument().getDocumentExternalId().toString()))
-//                .andExpect(jsonPath("$.content[0].document.type").value(userEntity.getDocument().getType().toString()))
-//                .andExpect(jsonPath("$.content[0].document.number").value(Mask.formatDocument(
-//                        userEntity.getDocument().getType(),
-//                        userEntity.getDocument().getNumber())
-//                ))
-//                .andExpect(result -> {
-//                    String json = result.getResponse().getContentAsString();
-//
-//                    String jsonDate = JsonPath.read(json, "$.content[0].createdAt");
-//                    OffsetDateTime actual = OffsetDateTime.parse(jsonDate);
-//
-//                    assertEquals(userEntity.getCreatedAt(), actual);
-//                })
-//                .andExpect(jsonPath("$.size").value(5))
-//                .andExpect(jsonPath("$.totalElements").value(1))
-//                .andExpect(jsonPath("$.totalPages").value(1))
-//                .andExpect(jsonPath("$.number").value(0));
-//    }
 
+    @Test
+    @Order(38)
+    @SneakyThrows
+    void givenUserFilterDtoWhenListAllThenReturnUserWithoutDocument() {
+        // Create another user
+        UserEntity userEntity = createUser(
+                DocumentEntity.builder()
+                        .type(DocumentType.NONE)
+                        .build(),
+                roleIdExisting,
+                projectIdExisting
+        );
 
-    // TODO: fazer os testes do delete do usuario
+        UserFilterDTO userFilterDTO = UserFilterDTO.builder()
+                .userExternalId(userEntity.getUserExternalId())
+                .firstName(userEntity.getFirstName())
+                .lastName(userEntity.getLastName())
+                .email(userEntity.getEmail())
+                .createdAtFrom(userEntity.getCreatedAt())
+                .createdAtFrom(userEntity.getCreatedAt())
+                .document(
+                        DocumentFilterDTO.builder()
+                                .type(userEntity.getDocument().getType())
+                                .number(userEntity.getDocument().getNumber())
+                                .build()
+                )
+                .build();
+
+        String payload = objectMapper.writeValueAsString(userFilterDTO);
+
+        String url = URL.concat("/search?sort=createdAt,DESC");
+        mockMvc.perform(post(url)
+                        .header("projectExternalId", projectIdExisting)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON)
+                        .content(payload)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].userExternalId").value(userEntity.getUserExternalId().toString()))
+                .andExpect(jsonPath("$.content[0].firstName").value(userEntity.getFirstName()))
+                .andExpect(jsonPath("$.content[0].lastName").value(userEntity.getLastName()))
+                .andExpect(jsonPath("$.content[0].email").value(userEntity.getEmail()))
+                .andExpect(jsonPath("$.content[0].document.documentExternalId").value(userEntity.getDocument().getDocumentExternalId().toString()))
+                .andExpect(jsonPath("$.content[0].document.type").value(userEntity.getDocument().getType().toString()))
+                .andExpect(jsonPath("$.content[0].document.number").doesNotExist())
+                .andExpect(result -> {
+                    String json = result.getResponse().getContentAsString();
+
+                    String jsonDate = JsonPath.read(json, "$.content[0].createdAt");
+                    OffsetDateTime actual = OffsetDateTime.parse(jsonDate);
+
+                    assertEquals(userEntity.getCreatedAt(), actual);
+                })
+                .andExpect(jsonPath("$.size").value(5))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.number").value(0));
+    }
+
+    @Test
+    @Order(39)
+    @SneakyThrows
+    void givenUserExternalIdExistingWithProjectExternalIdExistingWhenDeleteByExternalIdThenReturnNoContent() {
+        mockMvc.perform(delete(URL.concat("/{userExternalId}"), userIdExisting)
+                        .header("projectExternalId", projectIdExisting)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON)
+                )
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @Order(40)
+    @SneakyThrows
+    void givenUserExternalIdExistingWithProjectExternalIdNonExistingWhenDeleteByExternalIdThenReturnNotFound() {
+        mockMvc.perform(delete(URL.concat("/{userExternalId}"), userIdExisting)
+                        .header("projectExternalId", projectIdNonExisting)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON)
+                )
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.title").value("Resource Not Found"))
+                .andExpect(jsonPath("$.detail").value(String.format("User with ID %s not found for Project with ID %s", userIdExisting, projectIdNonExisting)))
+                .andExpect(jsonPath("$.message").value("The requested resource could not be found."))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+    @Test
+    @Order(41)
+    @SneakyThrows
+    void givenUserExternalIdNonExistingWithProjectExternalIdExistingWhenDeleteByExternalIdThenReturnNotFound() {
+        mockMvc.perform(delete(URL.concat("/{userExternalId}"), userIdNonExisting)
+                        .header("projectExternalId", projectIdExisting)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON)
+                )
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.title").value("Resource Not Found"))
+                .andExpect(jsonPath("$.detail").value(String.format("User with ID %s not found for Project with ID %s", userIdNonExisting, projectIdExisting)))
+                .andExpect(jsonPath("$.message").value("The requested resource could not be found."))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+    @Test
+    @Order(42)
+    @SneakyThrows
+    void givenUserExternalIdNonExistingWithProjectExternalIdNonExistingWhenDeleteByExternalIdThenReturnNotFound() {
+        mockMvc.perform(delete(URL.concat("/{userExternalId}"), userIdNonExisting)
+                        .header("projectExternalId", projectIdNonExisting)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON)
+                )
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.title").value("Resource Not Found"))
+                .andExpect(jsonPath("$.detail").value(String.format("User with ID %s not found for Project with ID %s", userIdNonExisting, projectIdNonExisting)))
+                .andExpect(jsonPath("$.message").value("The requested resource could not be found."))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
+    @Test
+    @Order(43)
+    @SneakyThrows
+    void givenUserExternalIdExistingWithProjectExternalIdExistingWhenDeleteByExternalIdThenThrowDueToProjectInUse() {
+        // Creating company
+        CompanyEntity companyEntity = createCompany(
+                DocumentEntity.builder()
+                        .type(DocumentType.CNPJ)
+                        .number(GenerateCNPJUtils.generateCNPJ())
+                        .build(),
+                projectIdExisting
+        );
+
+        // Associating company with user
+        createCompanyUserEntity(
+                companyEntity,
+                userIdExisting,
+                projectIdExisting
+        );
+
+        mockMvc.perform(delete(URL.concat("/{userExternalId}"), userIdExisting)
+                        .header("projectExternalId", projectIdExisting)
+                        .contentType(MEDIA_TYPE_JSON)
+                        .accept(MEDIA_TYPE_JSON)
+                )
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.title").value("Entity In Use"))
+                .andExpect(jsonPath("$.detail").value(String.format("User with ID %s cannot be removed as it is in use.", userIdExisting)))
+                .andExpect(jsonPath("$.message").value("The entity is currently in use and cannot be modified or deleted."))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
 
     public static Stream<Arguments> provideInvalidDocument() {
         String expectedErrorMessageInvalidDocument = "Invalid CPF number.";
@@ -1326,7 +1419,7 @@ class UserControllerIntegrationTest extends BaseControllerIntegrationTest {
                 .number(GenerateCPFUtils.generateCPF())
                 .build();
 
-        DocumentFilterDTO documentWithoutNumber = DocumentFilterDTO.builder()
+        DocumentFilterDTO documentCpfWithoutNumber = DocumentFilterDTO.builder()
                 .type(DocumentType.CPF)
                 .build();
 
@@ -1340,6 +1433,15 @@ class UserControllerIntegrationTest extends BaseControllerIntegrationTest {
                 .number("111.111.111-11")
                 .build();
 
+        DocumentFilterDTO documentCnpjWithoutNumber =  DocumentFilterDTO.builder()
+                .type(DocumentType.CNPJ)
+                .build();
+
+        DocumentFilterDTO documentNoneWithNumber = DocumentFilterDTO.builder()
+                .type(DocumentType.NONE)
+                .number("123456789")
+                .build();
+
         return Stream.of(
                 Arguments.of(
                         UserFilterDTO.builder()
@@ -1350,9 +1452,9 @@ class UserControllerIntegrationTest extends BaseControllerIntegrationTest {
                 ),
                 Arguments.of(
                         UserFilterDTO.builder()
-                                .document(documentWithoutNumber)
+                                .document(documentCpfWithoutNumber)
                                 .build(),
-                        "Document number of the user is required",
+                        "Document number must be provided when document type is CPF.",
                         "document.number"
                 ),
                 Arguments.of(
@@ -1367,6 +1469,20 @@ class UserControllerIntegrationTest extends BaseControllerIntegrationTest {
                                 .document(documentWithSequenceDigital)
                                 .build(),
                         "CPF number cannot be sequential digits.",
+                        "document.number"
+                ),
+                Arguments.of(
+                        UserFilterDTO.builder()
+                                .document(documentCnpjWithoutNumber)
+                                .build(),
+                        "Document number must be provided when document type is CNPJ.",
+                        "document.number"
+                ),
+                Arguments.of(
+                        UserFilterDTO.builder()
+                                .document(documentNoneWithNumber)
+                                .build(),
+                        "Document number must be null or empty when document type is NONE.",
                         "document.number"
                 )
         );
