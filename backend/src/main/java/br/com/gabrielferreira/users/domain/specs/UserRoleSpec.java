@@ -25,6 +25,9 @@ public class UserRoleSpec implements Specification<RoleEntity> {
     @Serial
     private static final long serialVersionUID = -1549798442742862620L;
 
+    private static final String USERS = "users";
+    private static final String PROJECT = "project";
+
     private final UUID userExternalId;
 
     private final RoleFilter filter;
@@ -33,11 +36,11 @@ public class UserRoleSpec implements Specification<RoleEntity> {
     public Predicate toPredicate(Root<RoleEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
         List<Predicate> predicates = new ArrayList<>();
 
-        Join<RoleEntity, UserEntity> userJoin = root.join("users", JoinType.INNER);
+        Join<RoleEntity, UserEntity> userJoin = root.join(USERS, JoinType.INNER);
         predicates.add(criteriaBuilder.equal(userJoin.get("userExternalId"), userExternalId));
 
         if (filter.isProjectExternalIdPresent()) {
-            Join<RoleEntity, ProjectEntity> projectJoin = root.join("project", JoinType.INNER);
+            Join<RoleEntity, ProjectEntity> projectJoin = root.join(PROJECT, JoinType.INNER);
             Predicate predicateProjectExternalId = criteriaBuilder.equal(
                     projectJoin.get("projectExternalId"), filter.projectExternalId()
             );
@@ -80,11 +83,11 @@ public class UserRoleSpec implements Specification<RoleEntity> {
         }
 
         if (Objects.nonNull(query) && RoleEntity.class.equals(query.getResultType())) {
-            root.fetch("users", JoinType.INNER);
-            root.fetch("project", JoinType.INNER);
+            root.fetch(USERS, JoinType.INNER);
+            root.fetch(PROJECT, JoinType.INNER);
         } else {
-            root.join("users", JoinType.INNER);
-            root.join("project", JoinType.INNER);
+            root.join(USERS, JoinType.INNER);
+            root.join(PROJECT, JoinType.INNER);
         }
 
         return criteriaBuilder.and(predicates.toArray(Predicate[]::new));

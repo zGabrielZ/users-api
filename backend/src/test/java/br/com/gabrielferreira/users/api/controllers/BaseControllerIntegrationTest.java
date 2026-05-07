@@ -147,4 +147,15 @@ public abstract class BaseControllerIntegrationTest {
                 .build();
         return companyUserRepository.saveAndFlush(companyUserEntity);
     }
+
+    public void associateRole(UUID userIdExisting, UUID projectIdExisting, UUID roleIdExisting) {
+        UserEntity userEntity = userRepository.findOneByUserExternalIdAndProjectExternalId(userIdExisting, projectIdExisting)
+                .orElseThrow();
+
+        RoleEntity roleEntity = roleRepository.findOneByRoleExternalIdAndProjectExternalId(roleIdExisting, projectIdExisting)
+                .orElseThrow();
+
+        userEntity.getRoles().add(roleEntity);
+        userRepository.saveAndFlush(userEntity);
+    }
 }
