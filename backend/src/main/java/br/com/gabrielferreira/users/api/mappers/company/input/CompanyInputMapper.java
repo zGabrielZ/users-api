@@ -15,9 +15,12 @@ import br.com.gabrielferreira.users.domain.enums.DocumentType;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
 public interface CompanyInputMapper {
+
+    CompanyInputMapper INSTANCE = Mappers.getMapper(CompanyInputMapper.class);
 
     @Mapping(source = "name", target = "name", qualifiedByName = "trimIfNotBlank")
     @Mapping(target = "document", expression = "java(toDocumentEntity(createCompanyInputDTO))")

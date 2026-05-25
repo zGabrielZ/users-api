@@ -2,6 +2,7 @@ package br.com.gabrielferreira.users.stub.document;
 
 import br.com.gabrielferreira.users.domain.entities.DocumentEntity;
 import br.com.gabrielferreira.users.domain.enums.DocumentType;
+import br.com.gabrielferreira.users.utils.GenerateCNPJUtils;
 import br.com.gabrielferreira.users.utils.GenerateCPFUtils;
 
 import java.util.UUID;
@@ -26,6 +27,15 @@ public class DocumentEntityStub {
                 .id(2L)
                 .documentExternalId(UUID.randomUUID())
                 .type(DocumentType.NONE)
+                .build();
+    }
+
+    public static DocumentEntity documentCnpjEntityCreated() {
+        return DocumentEntity.builder()
+                .id(3L)
+                .documentExternalId(FIXED_UUID)
+                .type(DocumentType.CNPJ)
+                .number(GenerateCNPJUtils.generateCNPJ())
                 .build();
     }
 }

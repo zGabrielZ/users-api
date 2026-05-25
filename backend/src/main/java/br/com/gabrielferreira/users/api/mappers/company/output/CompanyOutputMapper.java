@@ -6,9 +6,12 @@ import br.com.gabrielferreira.users.domain.entities.CompanyEntity;
 import br.com.gabrielferreira.users.domain.entities.DocumentEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
 public interface CompanyOutputMapper {
+
+    CompanyOutputMapper INSTANCE = Mappers.getMapper(CompanyOutputMapper.class);
 
     @Mapping(target = "companyExternalId", source = "companyExternalId")
     @Mapping(target = "name", source = "name")
